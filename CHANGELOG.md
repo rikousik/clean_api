@@ -1,3 +1,10 @@
+## 0.0.2
+* Just changed the file name.
+
+
 ## 0.0.1
 
-* TODO: Describe initial release.
+* First publish.
+
+
+
