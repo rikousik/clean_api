@@ -1,5 +1,5 @@
-name: rest_api_helper
-description: A simple package to implement Rest Api with caching.
+name: clean_api
+description: Cleanest way to implement Rest Api with caching using functional programming aproach.
 version: 0.0.1
 homepage: https://github.com/ambanikousik/rest_api_helper
 

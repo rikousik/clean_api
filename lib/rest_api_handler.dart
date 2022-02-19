@@ -1,4 +1,4 @@
-library rest_api_helper;
+library clean_api;
 
 import 'package:fpdart/fpdart.dart';
 import 'package:hive/hive.dart';
@@ -10,7 +10,7 @@ import 'dart:convert';
 import 'api_failure.dart';
 export 'api_failure.dart';
 
-class ApiHelper {
+class CleanApi {
   late String _baseUrl;
   Map<String, String>? _token;
   Box? _cacheBox;
@@ -19,10 +19,10 @@ class ApiHelper {
   void enableCache(Box box) => _cacheBox = box;
 
   String getBaseUrl() => _baseUrl;
-  ApiHelper._();
+  CleanApi._();
 
-  static final ApiHelper _instance = ApiHelper._();
-  factory ApiHelper.instance() => _instance;
+  static final CleanApi _instance = CleanApi._();
+  factory CleanApi.instance() => _instance;
 
   Future<Map<String, String>> header(bool withToken) async {
     if (withToken) {
