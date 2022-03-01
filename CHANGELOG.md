@@ -1,3 +1,6 @@
+## 0.0.4
+* Fixed get call
+
 ## 0.0.3
 * Updated readme and example.
 

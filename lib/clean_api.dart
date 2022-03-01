@@ -9,6 +9,7 @@ import 'dart:convert';
 
 import 'api_failure.dart';
 export 'api_failure.dart';
+export 'package:fpdart/fpdart.dart';
 
 class CleanApi {
   late String _baseUrl;
@@ -40,7 +41,7 @@ class CleanApi {
   }
 
   Future<Either<ApiFailure, T>> get<T>(
-      {required T Function(Map<String, dynamic> json) fromJson,
+      {required T Function(dynamic json) fromJson,
       required String endPoint,
       bool withToken = true}) async {
     final Map<String, String> _header = await header(withToken);
@@ -55,8 +56,7 @@ class CleanApi {
       Logger().wtf(_response.request);
 
       if (_response.statusCode == 200) {
-        final Map<String, dynamic> _regResponse = json
-            .decode(utf8.decode(_response.bodyBytes)) as Map<String, dynamic>;
+        final dynamic _regResponse = json.decode(_response.body);
         Logger(
           printer: PrettyPrinter(
             lineLength: 120, // width of the output
@@ -143,7 +143,7 @@ class CleanApi {
   }
 
   Future<Either<ApiFailure, T>> post<T>(
-      {required T Function(Map<String, dynamic> json) fromJson,
+      {required T Function(dynamic json) fromJson,
       required Map<String, dynamic> body,
       required String endPoint,
       bool withToken = true}) async {
@@ -163,8 +163,7 @@ class CleanApi {
       Logger().i(_response.request);
 
       if (_response.statusCode >= 200 && _response.statusCode <= 299) {
-        final Map<String, dynamic> _regResponse =
-            jsonDecode(_response.body) as Map<String, dynamic>;
+        final _regResponse = jsonDecode(_response.body);
 
         final T _typedResponse = fromJson(_regResponse);
         return right(_typedResponse);
