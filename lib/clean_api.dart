@@ -4,7 +4,6 @@ import 'package:clean_api/src/clean_log.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart';
-import 'package:logger/logger.dart' as logger;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 

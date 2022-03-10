@@ -100,7 +100,7 @@ class CleanApi {
     try {
       String? body = _cacheBox?.get(endPoint) as String?;
       if (body != null && body.isNotEmpty) {
-        logger.Logger().i(body);
+        log.printInfo(info: "body: $body", canPrint: canPrint);
         final Map<String, dynamic> _regResponse =
             jsonDecode(body) as Map<String, dynamic>;
         final T _typedResponse = fromJson(_regResponse);
