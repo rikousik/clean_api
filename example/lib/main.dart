@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'package:clean_api/clean_api.dart';
-import 'package:fpdart/src/either.dart';
 
 void main() {
-  CleanApi.instance().setBaseUrl('https://catfact.ninja/');
+  CleanApi.instance().setup(baseUrl: 'https://catfact.ninja/', showLogs: true);
+
   runApp(const MyApp());
 }
 
@@ -36,8 +35,11 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       text = 'Loading';
     });
-    final Either<ApiFailure, CatModel> response = await cleanApi.get(
-        fromJson: (json) => CatModel.fromJson(json), endPoint: 'fact');
+    final Either<CleanFailure, CatModel> response = await cleanApi.get(
+        fromJson: (json) {
+          return CatModel.fromJson(json);
+        },
+        endPoint: 'faact');
 
     setState(() {
       text = response.fold((l) => l.toString(), (r) => r.fact);

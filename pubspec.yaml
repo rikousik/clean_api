@@ -1,6 +1,7 @@
 name: clean_api
-description: Cleanest way to implement Rest Api with caching using functional programming aproach.
-version: 0.0.5
+description: Cleanest way to implement Rest Api with caching using functional
+  programming aproach.
+version: 0.0.6
 homepage: https://github.com/ambanikousik/rest_api_helper
 
 environment:
@@ -11,6 +12,7 @@ dependencies:
   equatable: ^2.0.3
   flutter:
     sdk: flutter
+  flutter_easylogger: ^2.3.3
   fpdart: ^0.0.14
   hive: ^2.0.5
   hive_flutter: ^1.1.0
@@ -26,6 +28,7 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 # The following section is specific to Flutter.
 flutter: null
+
 # To add assets to your package, add an assets section, like this:
 # assets:
 #   - images/a_dot_burr.jpeg

@@ -1,4 +1,7 @@
 ## 0.0.4
+* Improved loggin
+
+## 0.0.4
 * Fixed get call
 
 ## 0.0.3
