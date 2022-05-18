@@ -67,13 +67,27 @@ class CleanApi {
         log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
         log.printWarning(
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-        return left(
-            CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
+        return left(CleanFailure.withData(
+            method: 'customUrlGet',
+            tag: T.runtimeType.toString(),
+            url: url,
+            header: const {},
+            body: const {},
+            error: _response.body));
+        // return left(
+        //     CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-      return left(
-          CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
+      return left(CleanFailure.withData(
+          method: 'customUrlGet',
+          tag: T.runtimeType.toString(),
+          url: url,
+          header: const {},
+          body: const {},
+          error: e.toString()));
+      // return left(
+      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
     }
   }
 
@@ -110,13 +124,27 @@ class CleanApi {
         return right(_typedResponse);
       } else {
         log.printError(error: 'No cache available', canPrint: canPrint);
-        return left(CleanFailure(
-            error: 'No cache available', tag: T.runtimeType.toString()));
+        return left(CleanFailure.withData(
+            method: 'getFromCache',
+            tag: T.runtimeType.toString(),
+            url: "$_baseUrl$endPoint",
+            header: const {},
+            body: const {},
+            error: 'No cache available'));
+        // return left(CleanFailure(
+        //     error: 'No cache available', tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-      return left(
-          CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
+      return left(CleanFailure.withData(
+          method: 'getFromCache',
+          tag: T.runtimeType.toString(),
+          url: "$_baseUrl$endPoint",
+          header: const {},
+          body: const {},
+          error: e.toString()));
+      // return left(
+      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
     }
   }
 
@@ -154,15 +182,30 @@ class CleanApi {
         log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
         log.printWarning(
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-        return left(
-            CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
+
+        return left(CleanFailure.withData(
+            tag: T.runtimeType.toString(),
+            method: 'GET',
+            url: "$_baseUrl$endPoint",
+            header: _header,
+            body: const {},
+            error: _response.body));
+        // return left(
+        //     CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
 
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-      return left(
-          CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
+      return left(CleanFailure.withData(
+          tag: T.runtimeType.toString(),
+          method: 'GET',
+          url: "$_baseUrl$endPoint",
+          header: _header,
+          body: const {},
+          error: e.toString()));
+      // return left(
+      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
     }
   }
 
@@ -198,18 +241,32 @@ class CleanApi {
         log.printWarning(
             warn: "request: ${_response.request}", canPrint: canPrint);
 
-        log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
+        log.printWarning(warn: "body: $body", canPrint: canPrint);
+        log.printError(error: "body: ${_response.body}", canPrint: canPrint);
+
         log.printWarning(
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-        return left(
-            CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
+
+        return left(CleanFailure.withData(
+            tag: T.runtimeType.toString(),
+            method: 'POST',
+            url: "$_baseUrl$endPoint",
+            header: _header,
+            body: body,
+            error: _response.body));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
 
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-      return left(
-          CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
+
+      return left(CleanFailure.withData(
+          tag: T.runtimeType.toString(),
+          method: 'POST',
+          url: "$_baseUrl$endPoint",
+          header: _header,
+          body: body,
+          error: e.toString()));
     }
   }
 
@@ -249,14 +306,30 @@ class CleanApi {
         log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
         log.printWarning(
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-        return left(
-            CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
+
+        return left(CleanFailure.withData(
+            tag: T.runtimeType.toString(),
+            method: 'PUT',
+            url: "$_baseUrl$endPoint",
+            header: _header,
+            body: body,
+            error: _response.body));
+        // return left(
+        //     CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-      return left(
-          CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
+
+      return left(CleanFailure.withData(
+          tag: T.runtimeType.toString(),
+          method: 'PUT',
+          url: "$_baseUrl$endPoint",
+          header: _header,
+          body: body,
+          error: e.toString()));
+      // return left(
+      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
     }
   }
 
@@ -296,14 +369,30 @@ class CleanApi {
         log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
         log.printWarning(
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-        return left(
-            CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
+        return left(CleanFailure.withData(
+            tag: T.runtimeType.toString(),
+            method: 'PUT',
+            url: "$_baseUrl$endPoint",
+            header: _header,
+            body: body,
+            error: _response.body));
+
+        // return left(
+        //     CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-      return left(
-          CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
+
+      return left(CleanFailure.withData(
+          tag: T.runtimeType.toString(),
+          method: 'PUT',
+          url: "$_baseUrl$endPoint",
+          header: _header,
+          body: body,
+          error: e.toString()));
+      // return left(
+      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
     }
   }
 
@@ -348,9 +437,13 @@ class CleanApi {
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-
-      return left(
-          CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
+      return left(CleanFailure.withData(
+          tag: T.runtimeType.toString(),
+          method: 'POST',
+          url: "$_baseUrl$endPoint",
+          header: _header,
+          body: const {},
+          error: e.toString()));
     }
   }
 }
