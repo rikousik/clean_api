@@ -1,5 +1,9 @@
 ## 0.0.7
 
+- Improved error view in details page
+
+## 0.0.7
+
 - Improved Error handling
 
 ## 0.0.4

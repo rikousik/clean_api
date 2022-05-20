@@ -1,8 +1,8 @@
 name: clean_api
 description: Cleanest way to implement Rest Api with caching using functional
   programming aproach.
-version: 0.0.7
-homepage: https://github.com/ambanikousik/rest_api_helper
+version: 0.0.8
+homepage: https://github.com/ambanikousik/clean_api
 
 environment:
   sdk: ">=2.16.1 <3.0.0"
