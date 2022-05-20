@@ -73,9 +73,9 @@ class CleanApi {
             url: url,
             header: const {},
             body: const {},
-            error: _response.body));
+            error: jsonDecode(_response.body)));
         // return left(
-        //     CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
+        //     CleanFailure( error: jsonDecode(_response.body), tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
@@ -189,9 +189,9 @@ class CleanApi {
             url: "$_baseUrl$endPoint",
             header: _header,
             body: const {},
-            error: _response.body));
+            error: jsonDecode(_response.body)));
         // return left(
-        //     CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
+        //     CleanFailure( error: jsonDecode(_response.body), tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
@@ -253,7 +253,7 @@ class CleanApi {
             url: "$_baseUrl$endPoint",
             header: _header,
             body: body,
-            error: _response.body));
+            error: jsonDecode(_response.body)));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
@@ -313,9 +313,9 @@ class CleanApi {
             url: "$_baseUrl$endPoint",
             header: _header,
             body: body,
-            error: _response.body));
+            error: jsonDecode(_response.body)));
         // return left(
-        //     CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
+        //     CleanFailure( error: jsonDecode(_response.body), tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
@@ -375,10 +375,10 @@ class CleanApi {
             url: "$_baseUrl$endPoint",
             header: _header,
             body: body,
-            error: _response.body));
+            error: jsonDecode(_response.body)));
 
         // return left(
-        //     CleanFailure(error: _response.body, tag: T.runtimeType.toString()));
+        //     CleanFailure( error: jsonDecode(_response.body), tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
@@ -431,7 +431,9 @@ class CleanApi {
         log.printWarning(
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
         return left(CleanFailure(
-            error: _response.body + ' ' + _response.statusCode.toString(),
+            error: jsonDecode(_response.body) +
+                ' ' +
+                _response.statusCode.toString(),
             tag: T.runtimeType.toString()));
       }
     } catch (e) {

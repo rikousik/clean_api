@@ -3,9 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class ErrorDetailsPage extends StatelessWidget {
+class CleanFailureDetailsPage extends StatelessWidget {
   final CleanFailure failure;
-  const ErrorDetailsPage({Key? key, required this.failure}) : super(key: key);
+  const CleanFailureDetailsPage({Key? key, required this.failure})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

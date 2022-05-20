@@ -41,8 +41,12 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         endPoint: 'faact');
 
-    setState(() {
-      text = response.fold((l) => l.toString(), (r) => r.fact);
+    response.fold((l) {
+      CleanFailureDialogue.show(context, failure: l);
+    }, (r) {
+      setState(() {
+        text = r.fact;
+      });
     });
   }
 

@@ -27,16 +27,18 @@ class CleanFailure extends Equatable {
       required String method,
       required Map<String, String> header,
       required Map<String, dynamic> body,
-      required String error}) {
+      required dynamic error}) {
     final String _tag = tag == 'Type' ? url : tag;
     final Map<String, dynamic> _errorMap = {
       'url': url,
-      'methid': method,
+      'method': method,
       if (header.isNotEmpty) 'header': header,
       if (body.isNotEmpty) 'body': body,
       'error': error
     };
-    final String _errorStr = jsonEncode(_errorMap);
+    final encoder = JsonEncoder.withIndent(' ' * 2);
+    // return encoder.convert(toJson());
+    final String _errorStr = encoder.convert(_errorMap);
     return CleanFailure(tag: _tag, error: _errorStr);
   }
   factory CleanFailure.none() => const CleanFailure(tag: '', error: '');

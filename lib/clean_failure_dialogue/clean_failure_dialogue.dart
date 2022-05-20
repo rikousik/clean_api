@@ -1,11 +1,11 @@
 import 'package:clean_api/clean_api.dart';
 import 'package:flutter/material.dart';
 
-import 'error_details_page.dart';
+import 'clean_failure_details_page.dart';
 
-class ErrorDialogue extends StatelessWidget {
+class CleanFailureDialogue extends StatelessWidget {
   final CleanFailure failure;
-  const ErrorDialogue(this.failure, {Key? key}) : super(key: key);
+  const CleanFailureDialogue(this.failure, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +16,7 @@ class ErrorDialogue extends StatelessWidget {
       titleTextStyle: const TextStyle(
           color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
       title: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(
             Icons.error_outline_sharp,
@@ -24,9 +25,11 @@ class ErrorDialogue extends StatelessWidget {
           const SizedBox(
             width: 5,
           ),
-          Text(
-            failure.tag,
-            maxLines: 2,
+          Flexible(
+            child: Text(
+              failure.tag,
+              maxLines: 2,
+            ),
           ),
         ],
       ),
@@ -47,7 +50,8 @@ class ErrorDialogue extends StatelessWidget {
               Navigator.of(context).pop();
 
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ErrorDetailsPage(failure: failure)));
+                  builder: (context) =>
+                      CleanFailureDetailsPage(failure: failure)));
             },
             child: const Text('View details'))
       ],
@@ -57,7 +61,8 @@ class ErrorDialogue extends StatelessWidget {
   static show(BuildContext context, {required CleanFailure failure}) {
     if (failure != CleanFailure.none()) {
       showDialog(
-          context: context, builder: (context) => ErrorDialogue(failure));
+          context: context,
+          builder: (context) => CleanFailureDialogue(failure));
     }
   }
 }
