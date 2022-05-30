@@ -48,7 +48,7 @@ class CleanApi {
         Uri.parse(url),
       );
 
-      log.printInfo(info: "request: ${_response.body}", canPrint: canPrint);
+      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
       log.printResponse(json: _response.body, canPrint: canPrint);
 
       if (_response.statusCode == 200) {
@@ -163,7 +163,7 @@ class CleanApi {
         headers: _header,
       );
 
-      log.printInfo(info: "request: ${_response.body}", canPrint: canPrint);
+      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
       log.printResponse(json: _response.body, canPrint: canPrint);
 
       if (_response.statusCode >= 200 && _response.statusCode <= 299) {
@@ -226,7 +226,7 @@ class CleanApi {
         headers: _header,
       );
 
-      log.printInfo(info: "request: ${_response.body}", canPrint: canPrint);
+      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
       log.printResponse(json: _response.body, canPrint: canPrint);
 
       if (_response.statusCode >= 200 && _response.statusCode <= 299) {
@@ -287,7 +287,7 @@ class CleanApi {
         headers: _header,
       );
 
-      log.printInfo(info: "request: ${_response.body}", canPrint: canPrint);
+      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
       log.printResponse(json: _response.body, canPrint: canPrint);
 
       if (_response.statusCode >= 200 && _response.statusCode <= 299) {
@@ -350,7 +350,7 @@ class CleanApi {
         headers: _header,
       );
 
-      log.printInfo(info: "request: ${_response.body}", canPrint: canPrint);
+      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
       log.printResponse(json: _response.body, canPrint: canPrint);
 
       if (_response.statusCode >= 200 && _response.statusCode <= 299) {
@@ -410,7 +410,7 @@ class CleanApi {
         Uri.parse("$_baseUrl$endPoint"),
         headers: _header,
       );
-      log.printInfo(info: "request: ${_response.body}", canPrint: canPrint);
+      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
       log.printResponse(json: _response.body, canPrint: canPrint);
 
       if (_response.statusCode >= 200 && _response.statusCode <= 299) {

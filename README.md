@@ -4,7 +4,7 @@ First setup your base url
 
 ```dart
 void main() {
-  CleanApi.instance().setBaseUrl('https://baseurl.com/');
+  leanApi.instance().setup(baseUrl: 'https://catfact.ninja/', showLogs: true);
   runApp(const MyApp());
 }
 ```
