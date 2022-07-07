@@ -1,3 +1,5 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 part of '../clean_api.dart';
 
 class CleanApi {
@@ -18,8 +20,10 @@ class CleanApi {
   String getBaseUrl() => _baseUrl;
   CleanApi._();
 
-  static final CleanApi _instance = CleanApi._();
-  factory CleanApi.instance() => _instance;
+  static final CleanApi instance = CleanApi._();
+  // factory CleanApi.instance() => _instance;
+
+  // static CleanApi get instance => _instance;
 
   Future<Map<String, String>> header(bool withToken) async {
     if (withToken) {
@@ -216,6 +220,7 @@ class CleanApi {
       required String endPoint,
       bool withToken = true}) async {
     final bool canPrint = showLogs ?? _showLogs;
+    log.printInfo(info: "body: $body", canPrint: canPrint);
 
     final Map<String, String> _header = await header(withToken);
 
@@ -277,6 +282,7 @@ class CleanApi {
       bool? showLogs,
       bool withToken = true}) async {
     final bool canPrint = showLogs ?? _showLogs;
+    log.printInfo(info: "body: $body", canPrint: canPrint);
 
     final Map<String, String> _header = await header(withToken);
 
@@ -342,7 +348,7 @@ class CleanApi {
     final bool canPrint = showLogs ?? _showLogs;
 
     final Map<String, String> _header = await header(withToken);
-
+    log.printInfo(info: "body: $body", canPrint: canPrint);
     try {
       final http.Response _response = await http.patch(
         Uri.parse("$_baseUrl$endPoint"),
@@ -399,15 +405,19 @@ class CleanApi {
   Future<Either<CleanFailure, T>> delete<T>(
       {required T Function(Map<String, dynamic> json) fromJson,
       required String endPoint,
+      Map<String, dynamic>? body,
       bool? showLogs,
       bool withToken = true}) async {
     final bool canPrint = showLogs ?? _showLogs;
-
+    if (body != null) {
+      log.printInfo(info: "body: $body", canPrint: canPrint);
+    }
     final Map<String, String> _header = await header(withToken);
     _header.addAll({'Accept': '*/*'});
     try {
       final Response _response = await http.delete(
         Uri.parse("$_baseUrl$endPoint"),
+        body: body,
         headers: _header,
       );
       log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);

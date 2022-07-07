@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:clean_api/clean_api.dart';
 
 void main() {
-  CleanApi.instance().setup(baseUrl: 'https://catfact.ninja/', showLogs: true);
+  CleanApi.instance.setup(baseUrl: 'https://catfact.ninja/', showLogs: true);
 
   runApp(const MyApp());
 }
@@ -30,7 +30,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String text = 'Press the button to load fact';
-  final cleanApi = CleanApi.instance();
+  final cleanApi = CleanApi.instance;
   void getCatFacts() async {
     setState(() {
       text = 'Loading';
@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
         fromJson: (json) {
           return CatModel.fromJson(json);
         },
-        endPoint: 'faact');
+        endPoint: 'fact');
 
     response.fold((l) {
       CleanFailureDialogue.show(context, failure: l);

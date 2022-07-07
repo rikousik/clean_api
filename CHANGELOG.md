@@ -1,5 +1,10 @@
 ## 0.0.9
 
+- Added body optional in delete method
+- Added print body even if you get error or not.
+
+## 0.0.9
+
 - Fixed request printing
 
 ## 0.0.8
