@@ -417,7 +417,7 @@ class CleanApi {
     try {
       final Response _response = await http.delete(
         Uri.parse("$_baseUrl$endPoint"),
-        body: body,
+        body: jsonEncode(body),
         headers: _header,
       );
       log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
@@ -454,7 +454,7 @@ class CleanApi {
           method: 'POST',
           url: "$_baseUrl$endPoint",
           header: _header,
-          body: const {},
+          body: body ?? {},
           error: e.toString()));
     }
   }

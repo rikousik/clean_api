@@ -1,4 +1,8 @@
-## 0.0.9
+## 0.1.1
+
+- Fixed delete body error
+
+## 0.1.0
 
 - Added body optional in delete method
 - Added print body even if you get error or not.
