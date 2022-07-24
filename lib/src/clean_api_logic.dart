@@ -8,7 +8,7 @@ class CleanApi {
   bool _showLogs = false;
   Map<String, String>? _token;
   Box? _cacheBox;
-  void setup({required String baseUrl, showLogs = false}) {
+  void setup({required String baseUrl, bool showLogs = false}) {
     log.init();
     _baseUrl = baseUrl;
     _showLogs = showLogs;
@@ -28,20 +28,20 @@ class CleanApi {
   Future<Map<String, String>> header(bool withToken) async {
     if (withToken) {
       return {
-        'Content-Type': 'application/json',
-        'Content': 'application/json',
+        'Content-Type': 'application/data',
+        'Content': 'application/data',
         if (_token != null) ..._token!
       };
     } else {
       return {
-        'Content-Type': 'application/json',
-        'Content': 'application/json',
+        'Content-Type': 'application/data',
+        'Content': 'application/data',
       };
     }
   }
 
   Future<Either<CleanFailure, T>> customUrlGet<T>({
-    required T Function(Map<String, dynamic> json) fromJson,
+    required T Function(Map<String, dynamic> data) fromData,
     bool? showLogs,
     required String url,
   }) async {
@@ -59,7 +59,7 @@ class CleanApi {
         final Map<String, dynamic> _regResponse = json
             .decode(utf8.decode(_response.bodyBytes)) as Map<String, dynamic>;
         _cacheBox?.put(url, _response.body);
-        final T _typedResponse = fromJson(_regResponse);
+        final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
             msg: "parsed data: $_typedResponse", canPrint: canPrint);
 
@@ -110,18 +110,17 @@ class CleanApi {
   }
 
   Either<CleanFailure, T> getFromCache<T>(
-      {required T Function(Map<String, dynamic> json) fromJson,
+      {required T Function(Map<String, dynamic> data) fromData,
       bool? showLogs,
       required String endPoint}) {
     final bool canPrint = showLogs ?? _showLogs;
-
     try {
       String? body = _cacheBox?.get(endPoint) as String?;
       if (body != null && body.isNotEmpty) {
         log.printInfo(info: "body: $body", canPrint: canPrint);
         final Map<String, dynamic> _regResponse =
             jsonDecode(body) as Map<String, dynamic>;
-        final T _typedResponse = fromJson(_regResponse);
+        final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
             msg: "parsed data: $_typedResponse", canPrint: canPrint);
 
@@ -153,7 +152,7 @@ class CleanApi {
   }
 
   Future<Either<CleanFailure, T>> get<T>(
-      {required T Function(dynamic json) fromJson,
+      {required T Function(dynamic data) fromData,
       required String endPoint,
       bool? showLogs,
       bool withToken = true}) async {
@@ -174,7 +173,7 @@ class CleanApi {
         final dynamic _regResponse = json.decode(_response.body);
 
         _cacheBox?.put(endPoint, _response.body);
-        final T _typedResponse = fromJson(_regResponse);
+        final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
             msg: "parsed data: $_typedResponse", canPrint: canPrint);
         return right(_typedResponse);
@@ -214,7 +213,7 @@ class CleanApi {
   }
 
   Future<Either<CleanFailure, T>> post<T>(
-      {required T Function(dynamic json) fromJson,
+      {required T Function(dynamic data) fromData,
       required Map<String, dynamic> body,
       bool? showLogs,
       required String endPoint,
@@ -237,7 +236,7 @@ class CleanApi {
       if (_response.statusCode >= 200 && _response.statusCode <= 299) {
         final _regResponse = jsonDecode(_response.body);
 
-        final T _typedResponse = fromJson(_regResponse);
+        final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
             msg: "parsed data: $_typedResponse", canPrint: canPrint);
         return right(_typedResponse);
@@ -276,7 +275,7 @@ class CleanApi {
   }
 
   Future<Either<CleanFailure, T>> put<T>(
-      {required T Function(Map<String, dynamic>? json) fromJson,
+      {required T Function(Map<String, dynamic>? data) fromData,
       required Map<String, dynamic> body,
       required String endPoint,
       bool? showLogs,
@@ -300,7 +299,7 @@ class CleanApi {
         final Map<String, dynamic> _regResponse =
             jsonDecode(_response.body) as Map<String, dynamic>;
 
-        final T _typedResponse = fromJson(_regResponse);
+        final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
             msg: "parsed data: $_typedResponse", canPrint: canPrint);
         return right(_typedResponse);
@@ -340,7 +339,7 @@ class CleanApi {
   }
 
   Future<Either<CleanFailure, T>> patch<T>(
-      {required T Function(Map<String, dynamic>? json) fromJson,
+      {required T Function(Map<String, dynamic>? data) fromData,
       required Map<String, dynamic> body,
       required String endPoint,
       bool? showLogs,
@@ -363,7 +362,7 @@ class CleanApi {
         final Map<String, dynamic> _regResponse =
             jsonDecode(_response.body) as Map<String, dynamic>;
 
-        final T _typedResponse = fromJson(_regResponse);
+        final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
             msg: "parsed data: $_typedResponse", canPrint: canPrint);
         return right(_typedResponse);
@@ -403,7 +402,7 @@ class CleanApi {
   }
 
   Future<Either<CleanFailure, T>> delete<T>(
-      {required T Function(Map<String, dynamic> json) fromJson,
+      {required T Function(Map<String, dynamic> data) fromData,
       required String endPoint,
       Map<String, dynamic>? body,
       bool? showLogs,
@@ -428,7 +427,7 @@ class CleanApi {
             jsonDecode(_response.body.isNotEmpty ? _response.body : "{}")
                 as Map<String, dynamic>;
         _cacheBox?.put(endPoint, _response.body);
-        final T _typedResponse = fromJson(_regResponse);
+        final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
             msg: "parsed data: $_typedResponse", canPrint: canPrint);
         return right(_typedResponse);

@@ -2,7 +2,9 @@
 
 import 'dart:convert';
 
+import 'package:clean_api/clean_api.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 class CleanFailure extends Equatable {
   final String tag;
@@ -47,6 +49,10 @@ class CleanFailure extends Equatable {
 
   @override
   String toString() => 'CleanFailure(type: $tag, error: $error)';
+
+  show(BuildContext context) {
+    CleanFailureDialogue.show(context, failure: this);
+  }
 
   @override
   List<Object> get props => [tag, error];

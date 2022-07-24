@@ -36,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
       text = 'Loading';
     });
     final Either<CleanFailure, CatModel> response = await cleanApi.get(
-        fromJson: (json) {
+        fromData: (json) {
           return CatModel.fromJson(json);
         },
         endPoint: 'fact');

@@ -7,8 +7,8 @@ import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'src/api_failure.dart';
-export 'src/api_failure.dart';
+import 'src/clean_failure.dart';
+export 'src/clean_failure.dart';
 export 'package:flutter_easylogger/flutter_logger.dart';
 export 'clean_failure_dialogue/clean_failure_dialogue.dart';
 export 'package:fpdart/fpdart.dart' hide State;
