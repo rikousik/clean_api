@@ -1,3 +1,9 @@
+## 0.1.2
+
+- Change fromMap to fromData function
+- Added type boolean in setup show logs
+- Added show dialogue function in failure itself
+
 ## 0.1.1
 
 - Fixed delete body error

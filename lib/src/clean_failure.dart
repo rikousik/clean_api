@@ -50,7 +50,7 @@ class CleanFailure extends Equatable {
   @override
   String toString() => 'CleanFailure(type: $tag, error: $error)';
 
-  show(BuildContext context) {
+  showDialogue(BuildContext context) {
     CleanFailureDialogue.show(context, failure: this);
   }
 
