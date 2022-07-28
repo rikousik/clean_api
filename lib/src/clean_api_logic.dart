@@ -28,14 +28,14 @@ class CleanApi {
   Future<Map<String, String>> header(bool withToken) async {
     if (withToken) {
       return {
-        'Content-Type': 'application/data',
-        'Content': 'application/data',
+        'Content-Type': 'application/json',
+        'Content': 'application/json',
         if (_token != null) ..._token!
       };
     } else {
       return {
-        'Content-Type': 'application/data',
-        'Content': 'application/data',
+        'Content-Type': 'application/json',
+        'Content': 'application/json',
       };
     }
   }
