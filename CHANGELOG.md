@@ -1,3 +1,7 @@
+## 0.1.3
+
+- Fixed header issue
+
 ## 0.1.2
 
 - Change fromMap to fromData function
