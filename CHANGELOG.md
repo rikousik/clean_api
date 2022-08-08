@@ -1,3 +1,15 @@
+## 0.1.6
+
+- Return full error instead of partial string
+
+## 0.1.5
+
+- Add null check delete body
+
+## 0.1.4
+
+- Fixed header issue in delete request
+
 ## 0.1.3
 
 - Fixed header issue

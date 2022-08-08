@@ -41,7 +41,7 @@ class CleanApi {
   }
 
   Future<Either<CleanFailure, T>> customUrlGet<T>({
-    required T Function(Map<String, dynamic> data) fromData,
+    required T Function(dynamic data) fromData,
     bool? showLogs,
     required String url,
   }) async {
@@ -77,9 +77,9 @@ class CleanApi {
             url: url,
             header: const {},
             body: const {},
-            error: jsonDecode(_response.body)));
+            error: cleanJsonDecode(_response.body)));
         // return left(
-        //     CleanFailure( error: jsonDecode(_response.body), tag: T.runtimeType.toString()));
+        //     CleanFailure( error: cleanJsonDecode(_response.body), tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
@@ -110,7 +110,7 @@ class CleanApi {
   }
 
   Either<CleanFailure, T> getFromCache<T>(
-      {required T Function(Map<String, dynamic> data) fromData,
+      {required T Function(dynamic data) fromData,
       bool? showLogs,
       required String endPoint}) {
     final bool canPrint = showLogs ?? _showLogs;
@@ -119,7 +119,7 @@ class CleanApi {
       if (body != null && body.isNotEmpty) {
         log.printInfo(info: "body: $body", canPrint: canPrint);
         final Map<String, dynamic> _regResponse =
-            jsonDecode(body) as Map<String, dynamic>;
+            cleanJsonDecode(body) as Map<String, dynamic>;
         final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
             msg: "parsed data: $_typedResponse", canPrint: canPrint);
@@ -192,9 +192,9 @@ class CleanApi {
             url: "$_baseUrl$endPoint",
             header: _header,
             body: const {},
-            error: jsonDecode(_response.body)));
+            error: cleanJsonDecode(_response.body)));
         // return left(
-        //     CleanFailure( error: jsonDecode(_response.body), tag: T.runtimeType.toString()));
+        //     CleanFailure( error: cleanJsonDecode(_response.body), tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
@@ -234,7 +234,7 @@ class CleanApi {
       log.printResponse(json: _response.body, canPrint: canPrint);
 
       if (_response.statusCode >= 200 && _response.statusCode <= 299) {
-        final _regResponse = jsonDecode(_response.body);
+        final _regResponse = cleanJsonDecode(_response.body);
 
         final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
@@ -257,7 +257,7 @@ class CleanApi {
             url: "$_baseUrl$endPoint",
             header: _header,
             body: body,
-            error: jsonDecode(_response.body)));
+            error: cleanJsonDecode(_response.body)));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
@@ -275,7 +275,7 @@ class CleanApi {
   }
 
   Future<Either<CleanFailure, T>> put<T>(
-      {required T Function(Map<String, dynamic>? data) fromData,
+      {required T Function(dynamic data) fromData,
       required Map<String, dynamic> body,
       required String endPoint,
       bool? showLogs,
@@ -297,7 +297,7 @@ class CleanApi {
 
       if (_response.statusCode >= 200 && _response.statusCode <= 299) {
         final Map<String, dynamic> _regResponse =
-            jsonDecode(_response.body) as Map<String, dynamic>;
+            cleanJsonDecode(_response.body) as Map<String, dynamic>;
 
         final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
@@ -318,9 +318,9 @@ class CleanApi {
             url: "$_baseUrl$endPoint",
             header: _header,
             body: body,
-            error: jsonDecode(_response.body)));
+            error: cleanJsonDecode(_response.body)));
         // return left(
-        //     CleanFailure( error: jsonDecode(_response.body), tag: T.runtimeType.toString()));
+        //     CleanFailure( error: cleanJsonDecode(_response.body), tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
@@ -339,7 +339,7 @@ class CleanApi {
   }
 
   Future<Either<CleanFailure, T>> patch<T>(
-      {required T Function(Map<String, dynamic>? data) fromData,
+      {required T Function(dynamic data) fromData,
       required Map<String, dynamic> body,
       required String endPoint,
       bool? showLogs,
@@ -360,7 +360,7 @@ class CleanApi {
 
       if (_response.statusCode >= 200 && _response.statusCode <= 299) {
         final Map<String, dynamic> _regResponse =
-            jsonDecode(_response.body) as Map<String, dynamic>;
+            cleanJsonDecode(_response.body) as Map<String, dynamic>;
 
         final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
@@ -380,10 +380,10 @@ class CleanApi {
             url: "$_baseUrl$endPoint",
             header: _header,
             body: body,
-            error: jsonDecode(_response.body)));
+            error: cleanJsonDecode(_response.body)));
 
         // return left(
-        //     CleanFailure( error: jsonDecode(_response.body), tag: T.runtimeType.toString()));
+        //     CleanFailure( error: cleanJsonDecode(_response.body), tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
@@ -402,7 +402,7 @@ class CleanApi {
   }
 
   Future<Either<CleanFailure, T>> delete<T>(
-      {required T Function(Map<String, dynamic> data) fromData,
+      {required T Function(dynamic data) fromData,
       required String endPoint,
       Map<String, dynamic>? body,
       bool? showLogs,
@@ -412,11 +412,10 @@ class CleanApi {
       log.printInfo(info: "body: $body", canPrint: canPrint);
     }
     final Map<String, String> _header = await header(withToken);
-    _header.addAll({'Accept': '*/*'});
     try {
       final Response _response = await http.delete(
         Uri.parse("$_baseUrl$endPoint"),
-        body: jsonEncode(body),
+        body: body != null ? jsonEncode(body) : null,
         headers: _header,
       );
       log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
@@ -424,8 +423,9 @@ class CleanApi {
 
       if (_response.statusCode >= 200 && _response.statusCode <= 299) {
         final Map<String, dynamic> _regResponse =
-            jsonDecode(_response.body.isNotEmpty ? _response.body : "{}")
+            cleanJsonDecode(_response.body.isNotEmpty ? _response.body : "{}")
                 as Map<String, dynamic>;
+
         _cacheBox?.put(endPoint, _response.body);
         final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
@@ -440,7 +440,7 @@ class CleanApi {
         log.printWarning(
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
         return left(CleanFailure(
-            error: jsonDecode(_response.body) +
+            error: cleanJsonDecode(_response.body) +
                 ' ' +
                 _response.statusCode.toString(),
             tag: T.runtimeType.toString()));
@@ -450,11 +450,19 @@ class CleanApi {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
       return left(CleanFailure.withData(
           tag: T.runtimeType.toString(),
-          method: 'POST',
+          method: 'DELETE',
           url: "$_baseUrl$endPoint",
           header: _header,
           body: body ?? {},
           error: e.toString()));
+    }
+  }
+
+  cleanJsonDecode(String body) {
+    try {
+      return jsonDecode(body);
+    } catch (_) {
+      throw body;
     }
   }
 }
