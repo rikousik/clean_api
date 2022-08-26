@@ -1,3 +1,15 @@
+## 0.1.9
+
+- Added option to disable dialogue
+
+## 0.1.8
+
+- Added getRespone
+
+## 0.1.7
+
+- Made post and put body nullable
+
 ## 0.1.6
 
 - Return full error instead of partial string

@@ -8,10 +8,15 @@ class CleanApi {
   bool _showLogs = false;
   Map<String, String>? _token;
   Box? _cacheBox;
-  void setup({required String baseUrl, bool showLogs = false}) {
+  late bool _enableDialogue;
+  void setup(
+      {required String baseUrl,
+      bool showLogs = false,
+      bool enableDialogue = true}) {
     log.init();
     _baseUrl = baseUrl;
     _showLogs = showLogs;
+    _enableDialogue = enableDialogue;
   }
 
   void setToken(Map<String, String> token) => _token = token;
@@ -72,6 +77,7 @@ class CleanApi {
         log.printWarning(
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
         return left(CleanFailure.withData(
+            enableDialogue: _enableDialogue,
             method: 'customUrlGet',
             tag: T.runtimeType.toString(),
             url: url,
@@ -84,6 +90,7 @@ class CleanApi {
     } catch (e) {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
       return left(CleanFailure.withData(
+          enableDialogue: _enableDialogue,
           method: 'customUrlGet',
           tag: T.runtimeType.toString(),
           url: url,
@@ -128,6 +135,7 @@ class CleanApi {
       } else {
         log.printError(error: 'No cache available', canPrint: canPrint);
         return left(CleanFailure.withData(
+            enableDialogue: _enableDialogue,
             method: 'getFromCache',
             tag: T.runtimeType.toString(),
             url: "$_baseUrl$endPoint",
@@ -140,6 +148,7 @@ class CleanApi {
     } catch (e) {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
       return left(CleanFailure.withData(
+          enableDialogue: _enableDialogue,
           method: 'getFromCache',
           tag: T.runtimeType.toString(),
           url: "$_baseUrl$endPoint",
@@ -187,6 +196,7 @@ class CleanApi {
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
 
         return left(CleanFailure.withData(
+            enableDialogue: _enableDialogue,
             tag: T.runtimeType.toString(),
             method: 'GET',
             url: "$_baseUrl$endPoint",
@@ -201,7 +211,64 @@ class CleanApi {
 
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
       return left(CleanFailure.withData(
+          enableDialogue: _enableDialogue,
           tag: T.runtimeType.toString(),
+          method: 'GET',
+          url: "$_baseUrl$endPoint",
+          header: _header,
+          body: const {},
+          error: e.toString()));
+      // return left(
+      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
+    }
+  }
+
+  Future<Either<CleanFailure, Response>> getResponse(
+      {required String endPoint, bool? showLogs, bool withToken = true}) async {
+    final bool canPrint = showLogs ?? _showLogs;
+
+    final Map<String, String> _header = await header(withToken);
+
+    try {
+      final Response _response = await http.get(
+        Uri.parse("$_baseUrl$endPoint"),
+        headers: _header,
+      );
+
+      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
+      log.printResponse(json: _response.body, canPrint: canPrint);
+
+      if (_response.statusCode >= 200 && _response.statusCode <= 299) {
+        log.printSuccess(
+            msg: "response body: ${_response.body}", canPrint: canPrint);
+        return right(_response);
+      } else {
+        log.printWarning(warn: "header: $_header", canPrint: canPrint);
+        log.printWarning(
+            warn: "request: ${_response.request}", canPrint: canPrint);
+
+        log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
+        log.printWarning(
+            warn: "status code: ${_response.statusCode}", canPrint: canPrint);
+
+        return left(CleanFailure.withData(
+            tag: 'Response',
+            method: 'GET',
+            enableDialogue: _enableDialogue,
+            url: "$_baseUrl$endPoint",
+            header: _header,
+            body: const {},
+            error: cleanJsonDecode(_response.body)));
+        // return left(
+        //     CleanFailure( error: cleanJsonDecode(_response.body), tag: T.runtimeType.toString()));
+      }
+    } catch (e) {
+      log.printError(error: "header: $_header", canPrint: canPrint);
+
+      log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
+      return left(CleanFailure.withData(
+          enableDialogue: _enableDialogue,
+          tag: 'Response',
           method: 'GET',
           url: "$_baseUrl$endPoint",
           header: _header,
@@ -214,19 +281,22 @@ class CleanApi {
 
   Future<Either<CleanFailure, T>> post<T>(
       {required T Function(dynamic data) fromData,
-      required Map<String, dynamic> body,
+      required Map<String, dynamic>? body,
       bool? showLogs,
       required String endPoint,
       bool withToken = true}) async {
     final bool canPrint = showLogs ?? _showLogs;
-    log.printInfo(info: "body: $body", canPrint: canPrint);
+
+    if (body != null) {
+      log.printInfo(info: "body: $body", canPrint: canPrint);
+    }
 
     final Map<String, String> _header = await header(withToken);
 
     try {
       final http.Response _response = await http.post(
         Uri.parse("$_baseUrl$endPoint"),
-        body: jsonEncode(body),
+        body: body != null ? jsonEncode(body) : null,
         headers: _header,
       );
 
@@ -253,10 +323,11 @@ class CleanApi {
 
         return left(CleanFailure.withData(
             tag: T.runtimeType.toString(),
+            enableDialogue: _enableDialogue,
             method: 'POST',
             url: "$_baseUrl$endPoint",
             header: _header,
-            body: body,
+            body: body ?? {'data': 'null'},
             error: cleanJsonDecode(_response.body)));
       }
     } catch (e) {
@@ -265,30 +336,32 @@ class CleanApi {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
 
       return left(CleanFailure.withData(
+          enableDialogue: _enableDialogue,
           tag: T.runtimeType.toString(),
           method: 'POST',
           url: "$_baseUrl$endPoint",
           header: _header,
-          body: body,
+          body: body ?? {'data': 'null'},
           error: e.toString()));
     }
   }
 
   Future<Either<CleanFailure, T>> put<T>(
       {required T Function(dynamic data) fromData,
-      required Map<String, dynamic> body,
+      required Map<String, dynamic>? body,
       required String endPoint,
       bool? showLogs,
       bool withToken = true}) async {
     final bool canPrint = showLogs ?? _showLogs;
-    log.printInfo(info: "body: $body", canPrint: canPrint);
-
+    if (body != null) {
+      log.printInfo(info: "body: $body", canPrint: canPrint);
+    }
     final Map<String, String> _header = await header(withToken);
 
     try {
       final http.Response _response = await http.put(
         Uri.parse("$_baseUrl$endPoint"),
-        body: jsonEncode(body),
+        body: body != null ? jsonEncode(body) : null,
         headers: _header,
       );
 
@@ -313,11 +386,12 @@ class CleanApi {
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
 
         return left(CleanFailure.withData(
+            enableDialogue: _enableDialogue,
             tag: T.runtimeType.toString(),
             method: 'PUT',
             url: "$_baseUrl$endPoint",
             header: _header,
-            body: body,
+            body: body ?? {"data": "null"},
             error: cleanJsonDecode(_response.body)));
         // return left(
         //     CleanFailure( error: cleanJsonDecode(_response.body), tag: T.runtimeType.toString()));
@@ -327,11 +401,12 @@ class CleanApi {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
 
       return left(CleanFailure.withData(
+          enableDialogue: _enableDialogue,
           tag: T.runtimeType.toString(),
           method: 'PUT',
           url: "$_baseUrl$endPoint",
           header: _header,
-          body: body,
+          body: body ?? {"data": "null"},
           error: e.toString()));
       // return left(
       //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
@@ -375,6 +450,7 @@ class CleanApi {
         log.printWarning(
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
         return left(CleanFailure.withData(
+            enableDialogue: _enableDialogue,
             tag: T.runtimeType.toString(),
             method: 'PUT',
             url: "$_baseUrl$endPoint",
@@ -390,14 +466,13 @@ class CleanApi {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
 
       return left(CleanFailure.withData(
+          enableDialogue: _enableDialogue,
           tag: T.runtimeType.toString(),
           method: 'PUT',
           url: "$_baseUrl$endPoint",
           header: _header,
           body: body,
           error: e.toString()));
-      // return left(
-      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
     }
   }
 
@@ -449,6 +524,7 @@ class CleanApi {
       log.printError(error: "header: $_header", canPrint: canPrint);
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
       return left(CleanFailure.withData(
+          enableDialogue: _enableDialogue,
           tag: T.runtimeType.toString(),
           method: 'DELETE',
           url: "$_baseUrl$endPoint",

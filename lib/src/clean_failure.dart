@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 class CleanFailure extends Equatable {
   final String tag;
   final String error;
+  final bool _enableDialogue;
 
-  const CleanFailure({
-    required this.tag,
-    required this.error,
-  });
+  const CleanFailure(
+      {required this.tag, required this.error, bool enableDialogue = true})
+      : _enableDialogue = enableDialogue;
 
   CleanFailure copyWith({
     String? tag,
@@ -31,6 +31,7 @@ class CleanFailure extends Equatable {
       required String method,
       required Map<String, String> header,
       required Map<String, dynamic> body,
+      bool enableDialogue = true,
       required dynamic error}) {
     final String _tag = tag == 'Type' ? url : tag;
     final Map<String, dynamic> _errorMap = {
@@ -43,7 +44,8 @@ class CleanFailure extends Equatable {
     final encoder = JsonEncoder.withIndent(' ' * 2);
     // return encoder.convert(toJson());
     final String _errorStr = encoder.convert(_errorMap);
-    return CleanFailure(tag: _tag, error: _errorStr);
+    return CleanFailure(
+        tag: _tag, error: _errorStr, enableDialogue: enableDialogue);
   }
   factory CleanFailure.none() => const CleanFailure(tag: '', error: '');
 
@@ -51,7 +53,11 @@ class CleanFailure extends Equatable {
   String toString() => 'CleanFailure(type: $tag, error: $error)';
 
   showDialogue(BuildContext context) {
-    CleanFailureDialogue.show(context, failure: this);
+    if (_enableDialogue) {
+      CleanFailureDialogue.show(context, failure: this);
+    } else {
+      Logger.e(this);
+    }
   }
 
   @override
