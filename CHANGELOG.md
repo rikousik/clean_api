@@ -1,3 +1,11 @@
+## 0.2.2
+
+- Fixed bugs
+
+## 0.2.1
+
+- Added failure handing functionality
+
 ## 0.2.0
 
 - Added failure handing functionality

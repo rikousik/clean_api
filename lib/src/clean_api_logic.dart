@@ -3,7 +3,7 @@
 part of '../clean_api.dart';
 
 typedef FailureHandler = Either<CleanFailure, T> Function<T>(
-    {required int statusCode, required Map<String, String> responseBody});
+    int statusCode, Map<String, dynamic> responseBody);
 
 class CleanApi {
   final CleanLog log = CleanLog();
@@ -442,8 +442,9 @@ class CleanApi {
     } else {
       if (failureHandler != null) {
         return failureHandler(
-            responseBody: cleanJsonDecode(response.body),
-            statusCode: response.statusCode);
+          response.statusCode,
+          cleanJsonDecode(response.body) as Map<String, dynamic>,
+        );
       } else {
         log.printWarning(
             warn: "header: ${response.request?.headers}", canPrint: canPrint);
