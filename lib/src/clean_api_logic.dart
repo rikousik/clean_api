@@ -2,6 +2,9 @@
 
 part of '../clean_api.dart';
 
+typedef FailureHandler = Either<CleanFailure, T> Function<T>(
+    {required int statusCode, required Map<String, String> responseBody});
+
 class CleanApi {
   final CleanLog log = CleanLog();
   late String _baseUrl;
@@ -30,17 +33,19 @@ class CleanApi {
 
   // static CleanApi get instance => _instance;
 
-  Future<Map<String, String>> header(bool withToken) async {
+  Map<String, String> header(bool withToken) {
     if (withToken) {
       return {
         'Content-Type': 'application/json',
         'Content': 'application/json',
+        'Accept': 'application/json',
         if (_token != null) ..._token!
       };
     } else {
       return {
         'Content-Type': 'application/json',
         'Content': 'application/json',
+        'Accept': 'application/json',
       };
     }
   }
@@ -77,6 +82,7 @@ class CleanApi {
         log.printWarning(
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
         return left(CleanFailure.withData(
+            statusCode: _response.statusCode,
             enableDialogue: _enableDialogue,
             method: 'customUrlGet',
             tag: T.runtimeType.toString(),
@@ -84,12 +90,11 @@ class CleanApi {
             header: const {},
             body: const {},
             error: cleanJsonDecode(_response.body)));
-        // return left(
-        //     CleanFailure( error: cleanJsonDecode(_response.body), tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
       return left(CleanFailure.withData(
+          statusCode: -1,
           enableDialogue: _enableDialogue,
           method: 'customUrlGet',
           tag: T.runtimeType.toString(),
@@ -97,8 +102,6 @@ class CleanApi {
           header: const {},
           body: const {},
           error: e.toString()));
-      // return left(
-      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
     }
   }
 
@@ -135,6 +138,7 @@ class CleanApi {
       } else {
         log.printError(error: 'No cache available', canPrint: canPrint);
         return left(CleanFailure.withData(
+            statusCode: -1,
             enableDialogue: _enableDialogue,
             method: 'getFromCache',
             tag: T.runtimeType.toString(),
@@ -142,12 +146,11 @@ class CleanApi {
             header: const {},
             body: const {},
             error: 'No cache available'));
-        // return left(CleanFailure(
-        //     error: 'No cache available', tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
       return left(CleanFailure.withData(
+          statusCode: -1,
           enableDialogue: _enableDialogue,
           method: 'getFromCache',
           tag: T.runtimeType.toString(),
@@ -155,8 +158,6 @@ class CleanApi {
           header: const {},
           body: const {},
           error: e.toString()));
-      // return left(
-      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
     }
   }
 
@@ -164,10 +165,11 @@ class CleanApi {
       {required T Function(dynamic data) fromData,
       required String endPoint,
       bool? showLogs,
-      bool withToken = true}) async {
+      bool withToken = true,
+      FailureHandler? failureHandler}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
-    final Map<String, String> _header = await header(withToken);
+    final Map<String, String> _header = header(withToken);
 
     try {
       final Response _response = await http.get(
@@ -175,42 +177,18 @@ class CleanApi {
         headers: _header,
       );
 
-      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
-      log.printResponse(json: _response.body, canPrint: canPrint);
-
-      if (_response.statusCode >= 200 && _response.statusCode <= 299) {
-        final dynamic _regResponse = json.decode(_response.body);
-
-        _cacheBox?.put(endPoint, _response.body);
-        final T _typedResponse = fromData(_regResponse);
-        log.printSuccess(
-            msg: "parsed data: $_typedResponse", canPrint: canPrint);
-        return right(_typedResponse);
-      } else {
-        log.printWarning(warn: "header: $_header", canPrint: canPrint);
-        log.printWarning(
-            warn: "request: ${_response.request}", canPrint: canPrint);
-
-        log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
-        log.printWarning(
-            warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-
-        return left(CleanFailure.withData(
-            enableDialogue: _enableDialogue,
-            tag: T.runtimeType.toString(),
-            method: 'GET',
-            url: "$_baseUrl$endPoint",
-            header: _header,
-            body: const {},
-            error: cleanJsonDecode(_response.body)));
-        // return left(
-        //     CleanFailure( error: cleanJsonDecode(_response.body), tag: T.runtimeType.toString()));
-      }
+      return _handleResponse(
+          response: _response,
+          endPoint: endPoint,
+          fromData: fromData,
+          failureHandler: failureHandler,
+          canPrint: canPrint);
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
 
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
       return left(CleanFailure.withData(
+          statusCode: -1,
           enableDialogue: _enableDialogue,
           tag: T.runtimeType.toString(),
           method: 'GET',
@@ -218,16 +196,17 @@ class CleanApi {
           header: _header,
           body: const {},
           error: e.toString()));
-      // return left(
-      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
     }
   }
 
-  Future<Either<CleanFailure, Response>> getResponse(
-      {required String endPoint, bool? showLogs, bool withToken = true}) async {
+  Future<Either<CleanFailure, Response>> getResponse({
+    required String endPoint,
+    bool? showLogs,
+    bool withToken = true,
+  }) async {
     final bool canPrint = showLogs ?? _showLogs;
 
-    final Map<String, String> _header = await header(withToken);
+    final Map<String, String> _header = header(withToken);
 
     try {
       final Response _response = await http.get(
@@ -252,6 +231,7 @@ class CleanApi {
             warn: "status code: ${_response.statusCode}", canPrint: canPrint);
 
         return left(CleanFailure.withData(
+            statusCode: _response.statusCode,
             tag: 'Response',
             method: 'GET',
             enableDialogue: _enableDialogue,
@@ -259,14 +239,13 @@ class CleanApi {
             header: _header,
             body: const {},
             error: cleanJsonDecode(_response.body)));
-        // return left(
-        //     CleanFailure( error: cleanJsonDecode(_response.body), tag: T.runtimeType.toString()));
       }
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
 
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
       return left(CleanFailure.withData(
+          statusCode: -1,
           enableDialogue: _enableDialogue,
           tag: 'Response',
           method: 'GET',
@@ -274,8 +253,6 @@ class CleanApi {
           header: _header,
           body: const {},
           error: e.toString()));
-      // return left(
-      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
     }
   }
 
@@ -284,14 +261,15 @@ class CleanApi {
       required Map<String, dynamic>? body,
       bool? showLogs,
       required String endPoint,
-      bool withToken = true}) async {
+      bool withToken = true,
+      FailureHandler? failureHandler}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
     if (body != null) {
       log.printInfo(info: "body: $body", canPrint: canPrint);
     }
 
-    final Map<String, String> _header = await header(withToken);
+    final Map<String, String> _header = header(withToken);
 
     try {
       final http.Response _response = await http.post(
@@ -299,43 +277,19 @@ class CleanApi {
         body: body != null ? jsonEncode(body) : null,
         headers: _header,
       );
-
-      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
-      log.printResponse(json: _response.body, canPrint: canPrint);
-
-      if (_response.statusCode >= 200 && _response.statusCode <= 299) {
-        final _regResponse = cleanJsonDecode(_response.body);
-
-        final T _typedResponse = fromData(_regResponse);
-        log.printSuccess(
-            msg: "parsed data: $_typedResponse", canPrint: canPrint);
-        return right(_typedResponse);
-      } else {
-        log.printWarning(warn: "header: $_header", canPrint: canPrint);
-        log.printWarning(
-            warn: "request: ${_response.request}", canPrint: canPrint);
-
-        log.printWarning(warn: "body: $body", canPrint: canPrint);
-        log.printError(error: "body: ${_response.body}", canPrint: canPrint);
-
-        log.printWarning(
-            warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-
-        return left(CleanFailure.withData(
-            tag: T.runtimeType.toString(),
-            enableDialogue: _enableDialogue,
-            method: 'POST',
-            url: "$_baseUrl$endPoint",
-            header: _header,
-            body: body ?? {'data': 'null'},
-            error: cleanJsonDecode(_response.body)));
-      }
+      return _handleResponse(
+          response: _response,
+          endPoint: endPoint,
+          fromData: fromData,
+          failureHandler: failureHandler,
+          canPrint: canPrint);
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
 
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
 
       return left(CleanFailure.withData(
+          statusCode: -1,
           enableDialogue: _enableDialogue,
           tag: T.runtimeType.toString(),
           method: 'POST',
@@ -351,12 +305,13 @@ class CleanApi {
       required Map<String, dynamic>? body,
       required String endPoint,
       bool? showLogs,
-      bool withToken = true}) async {
+      bool withToken = true,
+      FailureHandler? failureHandler}) async {
     final bool canPrint = showLogs ?? _showLogs;
     if (body != null) {
       log.printInfo(info: "body: $body", canPrint: canPrint);
     }
-    final Map<String, String> _header = await header(withToken);
+    final Map<String, String> _header = header(withToken);
 
     try {
       final http.Response _response = await http.put(
@@ -365,42 +320,18 @@ class CleanApi {
         headers: _header,
       );
 
-      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
-      log.printResponse(json: _response.body, canPrint: canPrint);
-
-      if (_response.statusCode >= 200 && _response.statusCode <= 299) {
-        final Map<String, dynamic> _regResponse =
-            cleanJsonDecode(_response.body) as Map<String, dynamic>;
-
-        final T _typedResponse = fromData(_regResponse);
-        log.printSuccess(
-            msg: "parsed data: $_typedResponse", canPrint: canPrint);
-        return right(_typedResponse);
-      } else {
-        log.printWarning(warn: "header: $_header", canPrint: canPrint);
-        log.printWarning(
-            warn: "request: ${_response.request}", canPrint: canPrint);
-
-        log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
-        log.printWarning(
-            warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-
-        return left(CleanFailure.withData(
-            enableDialogue: _enableDialogue,
-            tag: T.runtimeType.toString(),
-            method: 'PUT',
-            url: "$_baseUrl$endPoint",
-            header: _header,
-            body: body ?? {"data": "null"},
-            error: cleanJsonDecode(_response.body)));
-        // return left(
-        //     CleanFailure( error: cleanJsonDecode(_response.body), tag: T.runtimeType.toString()));
-      }
+      return _handleResponse(
+          response: _response,
+          endPoint: endPoint,
+          fromData: fromData,
+          failureHandler: failureHandler,
+          canPrint: canPrint);
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
 
       return left(CleanFailure.withData(
+          statusCode: -1,
           enableDialogue: _enableDialogue,
           tag: T.runtimeType.toString(),
           method: 'PUT',
@@ -408,8 +339,6 @@ class CleanApi {
           header: _header,
           body: body ?? {"data": "null"},
           error: e.toString()));
-      // return left(
-      //     CleanFailure(error: e.toString(), tag: T.runtimeType.toString()));
     }
   }
 
@@ -418,10 +347,11 @@ class CleanApi {
       required Map<String, dynamic> body,
       required String endPoint,
       bool? showLogs,
-      bool withToken = true}) async {
+      bool withToken = true,
+      FailureHandler? failureHandler}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
-    final Map<String, String> _header = await header(withToken);
+    final Map<String, String> _header = header(withToken);
     log.printInfo(info: "body: $body", canPrint: canPrint);
     try {
       final http.Response _response = await http.patch(
@@ -430,42 +360,18 @@ class CleanApi {
         headers: _header,
       );
 
-      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
-      log.printResponse(json: _response.body, canPrint: canPrint);
-
-      if (_response.statusCode >= 200 && _response.statusCode <= 299) {
-        final Map<String, dynamic> _regResponse =
-            cleanJsonDecode(_response.body) as Map<String, dynamic>;
-
-        final T _typedResponse = fromData(_regResponse);
-        log.printSuccess(
-            msg: "parsed data: $_typedResponse", canPrint: canPrint);
-        return right(_typedResponse);
-      } else {
-        log.printWarning(warn: "header: $_header", canPrint: canPrint);
-        log.printWarning(
-            warn: "request: ${_response.request}", canPrint: canPrint);
-
-        log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
-        log.printWarning(
-            warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-        return left(CleanFailure.withData(
-            enableDialogue: _enableDialogue,
-            tag: T.runtimeType.toString(),
-            method: 'PUT',
-            url: "$_baseUrl$endPoint",
-            header: _header,
-            body: body,
-            error: cleanJsonDecode(_response.body)));
-
-        // return left(
-        //     CleanFailure( error: cleanJsonDecode(_response.body), tag: T.runtimeType.toString()));
-      }
+      return _handleResponse(
+          response: _response,
+          endPoint: endPoint,
+          fromData: fromData,
+          failureHandler: failureHandler,
+          canPrint: canPrint);
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
 
       return left(CleanFailure.withData(
+          statusCode: -1,
           enableDialogue: _enableDialogue,
           tag: T.runtimeType.toString(),
           method: 'PUT',
@@ -481,49 +387,31 @@ class CleanApi {
       required String endPoint,
       Map<String, dynamic>? body,
       bool? showLogs,
+      FailureHandler? failureHandler,
       bool withToken = true}) async {
     final bool canPrint = showLogs ?? _showLogs;
     if (body != null) {
       log.printInfo(info: "body: $body", canPrint: canPrint);
     }
-    final Map<String, String> _header = await header(withToken);
+    final Map<String, String> _header = header(withToken);
     try {
       final Response _response = await http.delete(
         Uri.parse("$_baseUrl$endPoint"),
         body: body != null ? jsonEncode(body) : null,
         headers: _header,
       );
-      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
-      log.printResponse(json: _response.body, canPrint: canPrint);
 
-      if (_response.statusCode >= 200 && _response.statusCode <= 299) {
-        final Map<String, dynamic> _regResponse =
-            cleanJsonDecode(_response.body.isNotEmpty ? _response.body : "{}")
-                as Map<String, dynamic>;
-
-        _cacheBox?.put(endPoint, _response.body);
-        final T _typedResponse = fromData(_regResponse);
-        log.printSuccess(
-            msg: "parsed data: $_typedResponse", canPrint: canPrint);
-        return right(_typedResponse);
-      } else {
-        log.printWarning(warn: "header: $_header", canPrint: canPrint);
-        log.printWarning(
-            warn: "request: ${_response.request}", canPrint: canPrint);
-
-        log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
-        log.printWarning(
-            warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-        return left(CleanFailure(
-            error: cleanJsonDecode(_response.body) +
-                ' ' +
-                _response.statusCode.toString(),
-            tag: T.runtimeType.toString()));
-      }
+      return _handleResponse(
+          response: _response,
+          endPoint: endPoint,
+          fromData: fromData,
+          failureHandler: failureHandler,
+          canPrint: canPrint);
     } catch (e) {
       log.printError(error: "header: $_header", canPrint: canPrint);
       log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
       return left(CleanFailure.withData(
+          statusCode: -1,
           enableDialogue: _enableDialogue,
           tag: T.runtimeType.toString(),
           method: 'DELETE',
@@ -531,6 +419,50 @@ class CleanApi {
           header: _header,
           body: body ?? {},
           error: e.toString()));
+    }
+  }
+
+  Either<CleanFailure, T> _handleResponse<T>(
+      {required Response response,
+      required String endPoint,
+      Map<String, dynamic>? body,
+      required T Function(dynamic data) fromData,
+      required FailureHandler? failureHandler,
+      required bool canPrint}) {
+    log.printInfo(info: "request: ${response.request}", canPrint: canPrint);
+    log.printResponse(json: response.body, canPrint: canPrint);
+
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      final Map<String, dynamic> _regResponse =
+          cleanJsonDecode(response.body) as Map<String, dynamic>;
+
+      final T _typedResponse = fromData(_regResponse);
+      log.printSuccess(msg: "parsed data: $_typedResponse", canPrint: canPrint);
+      return right(_typedResponse);
+    } else {
+      if (failureHandler != null) {
+        return failureHandler(
+            responseBody: cleanJsonDecode(response.body),
+            statusCode: response.statusCode);
+      } else {
+        log.printWarning(
+            warn: "header: ${response.request?.headers}", canPrint: canPrint);
+        log.printWarning(
+            warn: "request: ${response.request}", canPrint: canPrint);
+
+        log.printWarning(warn: "body: ${response.body}", canPrint: canPrint);
+        log.printWarning(
+            warn: "status code: ${response.statusCode}", canPrint: canPrint);
+        return left(CleanFailure.withData(
+            statusCode: response.statusCode,
+            enableDialogue: _enableDialogue,
+            tag: T.runtimeType.toString(),
+            method: response.request!.method,
+            url: "$_baseUrl$endPoint",
+            header: response.request?.headers ?? {},
+            body: body ?? {},
+            error: cleanJsonDecode(response.body)));
+      }
     }
   }
 

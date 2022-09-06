@@ -45,7 +45,7 @@ class CleanFailureDialogue extends StatelessWidget {
             child: const Text('Ignore')),
         ElevatedButton(
             style: ElevatedButton.styleFrom(
-                primary: Colors.green, shape: const StadiumBorder()),
+                backgroundColor: Colors.green, shape: const StadiumBorder()),
             onPressed: () {
               Navigator.of(context).pop();
 

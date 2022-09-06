@@ -44,7 +44,7 @@ class CleanFailureDetailsPage extends StatelessWidget {
                     children: [
                       ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
+                              backgroundColor: Colors.white,
                               shape: const StadiumBorder(),
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 5),
@@ -62,7 +62,7 @@ class CleanFailureDetailsPage extends StatelessWidget {
                           )),
                       OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                              primary: Colors.white,
+                              backgroundColor: Colors.white,
                               side: BorderSide(
                                   width: 2, color: Colors.purple[900]!),
                               shape: const StadiumBorder(),

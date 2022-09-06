@@ -1,3 +1,7 @@
+## 0.2.0
+
+- Added failure handing functionality
+
 ## 0.1.9
 
 - Added option to disable dialogue
