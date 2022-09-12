@@ -433,8 +433,7 @@ class CleanApi {
     log.printResponse(json: response.body, canPrint: canPrint);
 
     if (response.statusCode >= 200 && response.statusCode <= 299) {
-      final Map<String, dynamic> _regResponse =
-          cleanJsonDecode(response.body) as Map<String, dynamic>;
+      final _regResponse = cleanJsonDecode(response.body);
 
       final T _typedResponse = fromData(_regResponse);
       log.printSuccess(msg: "parsed data: $_typedResponse", canPrint: canPrint);
@@ -443,7 +442,7 @@ class CleanApi {
       if (failureHandler != null) {
         return failureHandler(
           response.statusCode,
-          cleanJsonDecode(response.body) as Map<String, dynamic>,
+          cleanJsonDecode(response.body),
         );
       } else {
         log.printWarning(

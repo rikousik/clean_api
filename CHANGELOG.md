@@ -1,3 +1,7 @@
+## 0.2.3
+
+- All response are dynamic now
+
 ## 0.2.2
 
 - Fixed bugs
