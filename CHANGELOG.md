@@ -1,3 +1,7 @@
+## 0.2.4
+
+- CleanFailure errro tags are now endpoints
+
 ## 0.2.3
 
 - All response are dynamic now
