@@ -2,9 +2,6 @@
 
 part of '../clean_api.dart';
 
-typedef FailureHandler = Either<CleanFailure, T> Function<T>(
-    int statusCode, Map<String, dynamic> responseBody);
-
 class CleanApi {
   final CleanLog log = CleanLog();
   late String _baseUrl;
@@ -166,7 +163,9 @@ class CleanApi {
       required String endPoint,
       bool? showLogs,
       bool withToken = true,
-      FailureHandler? failureHandler}) async {
+      Either<CleanFailure, T> Function(
+              int statusCode, Map<String, dynamic> responseBody)?
+          failureHandler}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
     final Map<String, String> _header = header(withToken);
@@ -177,7 +176,7 @@ class CleanApi {
         headers: _header,
       );
 
-      return _handleResponse(
+      return _handleResponse<T>(
           response: _response,
           endPoint: endPoint,
           fromData: fromData,
@@ -262,7 +261,9 @@ class CleanApi {
       bool? showLogs,
       required String endPoint,
       bool withToken = true,
-      FailureHandler? failureHandler}) async {
+      Either<CleanFailure, T> Function(
+              int statusCode, Map<String, dynamic> responseBody)?
+          failureHandler}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
     if (body != null) {
@@ -277,7 +278,7 @@ class CleanApi {
         body: body != null ? jsonEncode(body) : null,
         headers: _header,
       );
-      return _handleResponse(
+      return _handleResponse<T>(
           response: _response,
           endPoint: endPoint,
           fromData: fromData,
@@ -306,7 +307,9 @@ class CleanApi {
       required String endPoint,
       bool? showLogs,
       bool withToken = true,
-      FailureHandler? failureHandler}) async {
+      Either<CleanFailure, T> Function(
+              int statusCode, Map<String, dynamic> responseBody)?
+          failureHandler}) async {
     final bool canPrint = showLogs ?? _showLogs;
     if (body != null) {
       log.printInfo(info: "body: $body", canPrint: canPrint);
@@ -320,7 +323,7 @@ class CleanApi {
         headers: _header,
       );
 
-      return _handleResponse(
+      return _handleResponse<T>(
           response: _response,
           endPoint: endPoint,
           fromData: fromData,
@@ -348,7 +351,9 @@ class CleanApi {
       required String endPoint,
       bool? showLogs,
       bool withToken = true,
-      FailureHandler? failureHandler}) async {
+      Either<CleanFailure, T> Function(
+              int statusCode, Map<String, dynamic> responseBody)?
+          failureHandler}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
     final Map<String, String> _header = header(withToken);
@@ -360,7 +365,7 @@ class CleanApi {
         headers: _header,
       );
 
-      return _handleResponse(
+      return _handleResponse<T>(
           response: _response,
           endPoint: endPoint,
           fromData: fromData,
@@ -387,7 +392,9 @@ class CleanApi {
       required String endPoint,
       Map<String, dynamic>? body,
       bool? showLogs,
-      FailureHandler? failureHandler,
+      Either<CleanFailure, T> Function(
+              int statusCode, Map<String, dynamic> responseBody)?
+          failureHandler,
       bool withToken = true}) async {
     final bool canPrint = showLogs ?? _showLogs;
     if (body != null) {
@@ -401,7 +408,7 @@ class CleanApi {
         headers: _header,
       );
 
-      return _handleResponse(
+      return _handleResponse<T>(
           response: _response,
           endPoint: endPoint,
           fromData: fromData,
@@ -427,7 +434,9 @@ class CleanApi {
       required String endPoint,
       Map<String, dynamic>? body,
       required T Function(dynamic data) fromData,
-      required FailureHandler? failureHandler,
+      required Either<CleanFailure, T> Function(
+              int statusCode, Map<String, dynamic> responseBody)?
+          failureHandler,
       required bool canPrint}) {
     log.printInfo(info: "request: ${response.request}", canPrint: canPrint);
     log.printResponse(json: response.body, canPrint: canPrint);

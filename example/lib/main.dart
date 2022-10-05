@@ -35,11 +35,12 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       text = 'Loading';
     });
-    final Either<CleanFailure, CatModel> response = await cleanApi.get(
-        fromData: (json) {
-          return CatModel.fromJson(json);
-        },
-        endPoint: 'fact');
+    final Either<CleanFailure, CatModel> response =
+        await cleanApi.get<CatModel>(
+            fromData: (json) {
+              return CatModel.fromJson(json);
+            },
+            endPoint: 'fact');
 
     response.fold((l) {
       CleanFailureDialogue.show(context, failure: l);

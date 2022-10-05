@@ -1,3 +1,7 @@
+## 0.2.5
+
+- Fixed failure handler type issue
+
 ## 0.2.4
 
 - CleanFailure errro tags are now endpoints
