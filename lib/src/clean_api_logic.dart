@@ -444,9 +444,37 @@ class CleanApi {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       final _regResponse = cleanJsonDecode(response.body);
 
-      final T _typedResponse = fromData(_regResponse);
-      log.printSuccess(msg: "parsed data: $_typedResponse", canPrint: canPrint);
-      return right(_typedResponse);
+      try {
+        final T _typedResponse = fromData(_regResponse);
+        log.printSuccess(
+            msg: "parsed data: $_typedResponse", canPrint: canPrint);
+        return right(_typedResponse);
+      } catch (e) {
+        if (failureHandler != null) {
+          return failureHandler(
+            response.statusCode,
+            cleanJsonDecode(response.body),
+          );
+        } else {
+          log.printWarning(
+              warn: "header: ${response.request?.headers}", canPrint: canPrint);
+          log.printWarning(
+              warn: "request: ${response.request}", canPrint: canPrint);
+
+          log.printWarning(warn: "body: ${response.body}", canPrint: canPrint);
+          log.printWarning(
+              warn: "status code: ${response.statusCode}", canPrint: canPrint);
+          return left(CleanFailure.withData(
+              statusCode: response.statusCode,
+              enableDialogue: _enableDialogue,
+              tag: endPoint,
+              method: response.request!.method,
+              url: "$_baseUrl$endPoint",
+              header: response.request?.headers ?? {},
+              body: body ?? {},
+              error: cleanJsonDecode(response.body)));
+        }
+      }
     } else {
       if (failureHandler != null) {
         return failureHandler(

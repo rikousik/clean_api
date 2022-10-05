@@ -1,3 +1,7 @@
+## 0.2.6
+
+- Improved failure handling
+
 ## 0.2.5
 
 - Fixed failure handler type issue
