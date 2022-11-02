@@ -1,5 +1,9 @@
 ## 0.2.6
 
+- Updated dependency
+
+## 0.2.6
+
 - Improved failure handling
 
 ## 0.2.5
