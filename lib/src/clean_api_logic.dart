@@ -7,7 +7,6 @@ class CleanApi {
   late String _baseUrl;
   bool _showLogs = false;
   Map<String, String>? _token;
-  Box? _cacheBox;
   late bool _enableDialogue;
   void setup(
       {required String baseUrl,
@@ -20,7 +19,6 @@ class CleanApi {
   }
 
   void setToken(Map<String, String> token) => _token = token;
-  void enableCache(Box box) => _cacheBox = box;
 
   String getBaseUrl() => _baseUrl;
   CleanApi._();
@@ -65,7 +63,6 @@ class CleanApi {
       if (_response.statusCode == 200) {
         final Map<String, dynamic> _regResponse = json
             .decode(utf8.decode(_response.bodyBytes)) as Map<String, dynamic>;
-        _cacheBox?.put(url, _response.body);
         final T _typedResponse = fromData(_regResponse);
         log.printSuccess(
             msg: "parsed data: $_typedResponse", canPrint: canPrint);
@@ -96,62 +93,6 @@ class CleanApi {
           method: 'customUrlGet',
           tag: url,
           url: url,
-          header: const {},
-          body: const {},
-          error: e.toString()));
-    }
-  }
-
-  void saveInCache<T>(
-      {required Map<String, dynamic> data,
-      required String endPoint,
-      bool? showLogs}) {
-    final bool canPrint = showLogs ?? _showLogs;
-
-    try {
-      _cacheBox!.put(endPoint, jsonEncode(data));
-      log.printSuccess(msg: "saved data: $data", canPrint: canPrint);
-    } catch (e) {
-      log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-    }
-  }
-
-  Either<CleanFailure, T> getFromCache<T>(
-      {required T Function(dynamic data) fromData,
-      bool? showLogs,
-      required String endPoint}) {
-    final bool canPrint = showLogs ?? _showLogs;
-    try {
-      String? body = _cacheBox?.get(endPoint) as String?;
-      if (body != null && body.isNotEmpty) {
-        log.printInfo(info: "body: $body", canPrint: canPrint);
-        final Map<String, dynamic> _regResponse =
-            cleanJsonDecode(body) as Map<String, dynamic>;
-        final T _typedResponse = fromData(_regResponse);
-        log.printSuccess(
-            msg: "parsed data: $_typedResponse", canPrint: canPrint);
-
-        return right(_typedResponse);
-      } else {
-        log.printError(error: 'No cache available', canPrint: canPrint);
-        return left(CleanFailure.withData(
-            statusCode: -1,
-            enableDialogue: _enableDialogue,
-            method: 'getFromCache',
-            tag: endPoint,
-            url: "$_baseUrl$endPoint",
-            header: const {},
-            body: const {},
-            error: 'No cache available'));
-      }
-    } catch (e) {
-      log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-      return left(CleanFailure.withData(
-          statusCode: -1,
-          enableDialogue: _enableDialogue,
-          method: 'getFromCache',
-          tag: endPoint,
-          url: "$_baseUrl$endPoint",
           header: const {},
           body: const {},
           error: e.toString()));

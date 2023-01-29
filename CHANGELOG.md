@@ -1,4 +1,12 @@
-## 0.2.6
+## 0.2.9
+
+- Updated dependencies
+
+## 0.2.8
+
+- removed caching
+
+## 0.2.7
 
 - Updated dependency
 
