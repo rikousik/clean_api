@@ -24,7 +24,8 @@ class CleanApi {
   };
   Map<String, String> get header => _header;
 
-  void setHeader(Map<String, String> header) => _header = header;
+  void setHeader(Map<String, String> header) =>
+      _header = {..._header, ...header};
 
   String getBaseUrl() => _baseUrl;
   CleanApi._();

@@ -1,4 +1,8 @@
-## 0.2.9
+## 0.2.1
+
+- minor fix
+
+## 0.3.0
 
 - Changed the way of header usage
 
