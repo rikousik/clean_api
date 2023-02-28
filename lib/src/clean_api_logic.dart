@@ -6,7 +6,6 @@ class CleanApi {
   final CleanLog log = CleanLog();
   late String _baseUrl;
   bool _showLogs = false;
-  Map<String, String>? _token;
   late bool _enableDialogue;
   void setup(
       {required String baseUrl,
@@ -18,38 +17,25 @@ class CleanApi {
     _enableDialogue = enableDialogue;
   }
 
-  void setToken(Map<String, String> token) => _token = token;
+  Map<String, String> _header = const {
+    'Content-Type': 'application/json',
+    'Content': 'application/json',
+    'Accept': 'application/json',
+  };
+  Map<String, String> get header => _header;
+
+  void setHeader(Map<String, String> header) => _header = header;
 
   String getBaseUrl() => _baseUrl;
   CleanApi._();
 
   static final CleanApi instance = CleanApi._();
-  // factory CleanApi.instance() => _instance;
 
-  // static CleanApi get instance => _instance;
-
-  Map<String, String> header(bool withToken) {
-    if (withToken) {
-      return {
-        'Content-Type': 'application/json',
-        'Content': 'application/json',
-        'Accept': 'application/json',
-        if (_token != null) ..._token!
-      };
-    } else {
-      return {
-        'Content-Type': 'application/json',
-        'Content': 'application/json',
-        'Accept': 'application/json',
-      };
-    }
-  }
-
-  Future<Either<CleanFailure, T>> customUrlGet<T>({
-    required T Function(dynamic data) fromData,
-    bool? showLogs,
-    required String url,
-  }) async {
+  Future<Either<CleanFailure, T>> customUrlGet<T>(
+      {required T Function(dynamic data) fromData,
+      bool? showLogs,
+      required String url,
+      Map<String, String>? header}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
     try {
@@ -103,13 +89,13 @@ class CleanApi {
       {required T Function(dynamic data) fromData,
       required String endPoint,
       bool? showLogs,
-      bool withToken = true,
       Either<CleanFailure, T> Function(
               int statusCode, Map<String, dynamic> responseBody)?
-          failureHandler}) async {
+          failureHandler,
+      Map<String, String>? header}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
-    final Map<String, String> _header = header(withToken);
+    final Map<String, String> _header = header ?? this.header;
 
     try {
       final Response _response = await http.get(
@@ -139,14 +125,13 @@ class CleanApi {
     }
   }
 
-  Future<Either<CleanFailure, Response>> getResponse({
-    required String endPoint,
-    bool? showLogs,
-    bool withToken = true,
-  }) async {
+  Future<Either<CleanFailure, Response>> getResponse(
+      {required String endPoint,
+      bool? showLogs,
+      Map<String, String>? header}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
-    final Map<String, String> _header = header(withToken);
+    final Map<String, String> _header = header ?? this.header;
 
     try {
       final Response _response = await http.get(
@@ -201,17 +186,17 @@ class CleanApi {
       required Map<String, dynamic>? body,
       bool? showLogs,
       required String endPoint,
-      bool withToken = true,
       Either<CleanFailure, T> Function(
               int statusCode, Map<String, dynamic> responseBody)?
-          failureHandler}) async {
+          failureHandler,
+      Map<String, String>? header}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
     if (body != null) {
       log.printInfo(info: "body: $body", canPrint: canPrint);
     }
 
-    final Map<String, String> _header = header(withToken);
+    final Map<String, String> _header = header ?? this.header;
 
     try {
       final http.Response _response = await http.post(
@@ -247,15 +232,15 @@ class CleanApi {
       required Map<String, dynamic>? body,
       required String endPoint,
       bool? showLogs,
-      bool withToken = true,
       Either<CleanFailure, T> Function(
               int statusCode, Map<String, dynamic> responseBody)?
-          failureHandler}) async {
+          failureHandler,
+      Map<String, String>? header}) async {
     final bool canPrint = showLogs ?? _showLogs;
     if (body != null) {
       log.printInfo(info: "body: $body", canPrint: canPrint);
     }
-    final Map<String, String> _header = header(withToken);
+    final Map<String, String> _header = header ?? this.header;
 
     try {
       final http.Response _response = await http.put(
@@ -291,13 +276,13 @@ class CleanApi {
       required Map<String, dynamic> body,
       required String endPoint,
       bool? showLogs,
-      bool withToken = true,
       Either<CleanFailure, T> Function(
               int statusCode, Map<String, dynamic> responseBody)?
-          failureHandler}) async {
+          failureHandler,
+      Map<String, String>? header}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
-    final Map<String, String> _header = header(withToken);
+    final Map<String, String> _header = header ?? this.header;
     log.printInfo(info: "body: $body", canPrint: canPrint);
     try {
       final http.Response _response = await http.patch(
@@ -336,12 +321,12 @@ class CleanApi {
       Either<CleanFailure, T> Function(
               int statusCode, Map<String, dynamic> responseBody)?
           failureHandler,
-      bool withToken = true}) async {
+      Map<String, String>? header}) async {
     final bool canPrint = showLogs ?? _showLogs;
     if (body != null) {
       log.printInfo(info: "body: $body", canPrint: canPrint);
     }
-    final Map<String, String> _header = header(withToken);
+    final Map<String, String> _header = header ?? this.header;
     try {
       final Response _response = await http.delete(
         Uri.parse("$_baseUrl$endPoint"),
@@ -378,7 +363,8 @@ class CleanApi {
       required Either<CleanFailure, T> Function(
               int statusCode, Map<String, dynamic> responseBody)?
           failureHandler,
-      required bool canPrint}) {
+      required bool canPrint,
+      Map<String, String>? header}) {
     log.printInfo(info: "request: ${response.request}", canPrint: canPrint);
     log.printResponse(json: response.body, canPrint: canPrint);
 
