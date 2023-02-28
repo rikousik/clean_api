@@ -1,5 +1,9 @@
 ## 0.2.9
 
+- Changed the way of header usage
+
+## 0.2.9
+
 - Updated dependencies
 
 ## 0.2.8
