@@ -89,6 +89,7 @@ class CleanApi {
   Future<Either<CleanFailure, T>> get<T>(
       {required T Function(dynamic data) fromData,
       required String endPoint,
+      Map<String, dynamic>? body,
       bool? showLogs,
       Either<CleanFailure, T> Function(
               int statusCode, Map<String, dynamic> responseBody)?
