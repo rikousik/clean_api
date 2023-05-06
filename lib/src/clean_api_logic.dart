@@ -32,64 +32,9 @@ class CleanApi {
 
   static final CleanApi instance = CleanApi._();
 
-  Future<Either<CleanFailure, T>> customUrlGet<T>(
-      {required T Function(dynamic data) fromData,
-      bool? showLogs,
-      required String url,
-      Map<String, String>? header}) async {
-    final bool canPrint = showLogs ?? _showLogs;
-
-    try {
-      final Response _response = await http.get(
-        Uri.parse(url),
-      );
-
-      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
-      log.printResponse(json: _response.body, canPrint: canPrint);
-
-      if (_response.statusCode == 200) {
-        final Map<String, dynamic> _regResponse = json
-            .decode(utf8.decode(_response.bodyBytes)) as Map<String, dynamic>;
-        final T _typedResponse = fromData(_regResponse);
-        log.printSuccess(
-            msg: "parsed data: $_typedResponse", canPrint: canPrint);
-
-        return right(_typedResponse);
-      } else {
-        log.printWarning(
-            warn: "request: ${_response.request}", canPrint: canPrint);
-
-        log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
-        log.printWarning(
-            warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-        return left(CleanFailure.withData(
-            statusCode: _response.statusCode,
-            enableDialogue: _enableDialogue,
-            method: 'customUrlGet',
-            tag: url,
-            url: url,
-            header: const {},
-            body: const {},
-            error: cleanJsonDecode(_response.body)));
-      }
-    } catch (e) {
-      log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-      return left(CleanFailure.withData(
-          statusCode: -1,
-          enableDialogue: _enableDialogue,
-          method: 'customUrlGet',
-          tag: url,
-          url: url,
-          header: const {},
-          body: const {},
-          error: e.toString()));
-    }
-  }
-
   Future<Either<CleanFailure, T>> get<T>(
       {required T Function(dynamic data) fromData,
       required String endPoint,
-      Map<String, dynamic>? body,
       bool? showLogs,
       Either<CleanFailure, T> Function(
               int statusCode, Map<String, dynamic> responseBody)?
@@ -98,89 +43,16 @@ class CleanApi {
     final bool canPrint = showLogs ?? _showLogs;
 
     final Map<String, String> _header = header ?? this.header;
+    final request = RequestData<T>(
+      method: RequestMethod.get,
+      uri: Uri.parse("$_baseUrl$endPoint"),
+      showLogs: canPrint,
+      fromData: fromData,
+      headers: _header,
+      failureHandler: failureHandler,
+    );
 
-    try {
-      final Response _response = await http.get(
-        Uri.parse("$_baseUrl$endPoint"),
-        headers: _header,
-      );
-
-      return _handleResponse<T>(
-          response: _response,
-          endPoint: endPoint,
-          fromData: fromData,
-          failureHandler: failureHandler,
-          canPrint: canPrint);
-    } catch (e) {
-      log.printError(error: "header: $_header", canPrint: canPrint);
-
-      log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-      return left(CleanFailure.withData(
-          statusCode: -1,
-          enableDialogue: _enableDialogue,
-          tag: endPoint,
-          method: 'GET',
-          url: "$_baseUrl$endPoint",
-          header: _header,
-          body: const {},
-          error: e.toString()));
-    }
-  }
-
-  Future<Either<CleanFailure, Response>> getResponse(
-      {required String endPoint,
-      bool? showLogs,
-      Map<String, String>? header}) async {
-    final bool canPrint = showLogs ?? _showLogs;
-
-    final Map<String, String> _header = header ?? this.header;
-
-    try {
-      final Response _response = await http.get(
-        Uri.parse("$_baseUrl$endPoint"),
-        headers: _header,
-      );
-
-      log.printInfo(info: "request: ${_response.request}", canPrint: canPrint);
-      log.printResponse(json: _response.body, canPrint: canPrint);
-
-      if (_response.statusCode >= 200 && _response.statusCode <= 299) {
-        log.printSuccess(
-            msg: "response body: ${_response.body}", canPrint: canPrint);
-        return right(_response);
-      } else {
-        log.printWarning(warn: "header: $_header", canPrint: canPrint);
-        log.printWarning(
-            warn: "request: ${_response.request}", canPrint: canPrint);
-
-        log.printWarning(warn: "body: ${_response.body}", canPrint: canPrint);
-        log.printWarning(
-            warn: "status code: ${_response.statusCode}", canPrint: canPrint);
-
-        return left(CleanFailure.withData(
-            statusCode: _response.statusCode,
-            tag: 'Response',
-            method: 'GET',
-            enableDialogue: _enableDialogue,
-            url: "$_baseUrl$endPoint",
-            header: _header,
-            body: const {},
-            error: cleanJsonDecode(_response.body)));
-      }
-    } catch (e) {
-      log.printError(error: "header: $_header", canPrint: canPrint);
-
-      log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-      return left(CleanFailure.withData(
-          statusCode: -1,
-          enableDialogue: _enableDialogue,
-          tag: 'Response',
-          method: 'GET',
-          url: "$_baseUrl$endPoint",
-          header: _header,
-          body: const {},
-          error: e.toString()));
-    }
+    return fetch<T>(request: request);
   }
 
   Future<Either<CleanFailure, T>> post<T>(
@@ -199,34 +71,16 @@ class CleanApi {
     }
 
     final Map<String, String> _header = header ?? this.header;
-
-    try {
-      final http.Response _response = await http.post(
-        Uri.parse("$_baseUrl$endPoint"),
-        body: body != null ? jsonEncode(body) : null,
+    final request = RequestData<T>(
+        method: RequestMethod.post,
+        uri: Uri.parse("$_baseUrl$endPoint"),
+        showLogs: canPrint,
+        fromData: fromData,
         headers: _header,
-      );
-      return _handleResponse<T>(
-          response: _response,
-          endPoint: endPoint,
-          fromData: fromData,
-          failureHandler: failureHandler,
-          canPrint: canPrint);
-    } catch (e) {
-      log.printError(error: "header: $_header", canPrint: canPrint);
+        failureHandler: failureHandler,
+        body: body);
 
-      log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-
-      return left(CleanFailure.withData(
-          statusCode: -1,
-          enableDialogue: _enableDialogue,
-          tag: endPoint,
-          method: 'POST',
-          url: "$_baseUrl$endPoint",
-          header: _header,
-          body: body ?? {'data': 'null'},
-          error: e.toString()));
-    }
+    return fetch<T>(request: request);
   }
 
   Future<Either<CleanFailure, T>> put<T>(
@@ -239,38 +93,22 @@ class CleanApi {
           failureHandler,
       Map<String, String>? header}) async {
     final bool canPrint = showLogs ?? _showLogs;
+
     if (body != null) {
       log.printInfo(info: "body: $body", canPrint: canPrint);
     }
+
     final Map<String, String> _header = header ?? this.header;
-
-    try {
-      final http.Response _response = await http.put(
-        Uri.parse("$_baseUrl$endPoint"),
-        body: body != null ? jsonEncode(body) : null,
+    final request = RequestData<T>(
+        method: RequestMethod.put,
+        uri: Uri.parse("$_baseUrl$endPoint"),
+        showLogs: canPrint,
+        fromData: fromData,
         headers: _header,
-      );
+        failureHandler: failureHandler,
+        body: body);
 
-      return _handleResponse<T>(
-          response: _response,
-          endPoint: endPoint,
-          fromData: fromData,
-          failureHandler: failureHandler,
-          canPrint: canPrint);
-    } catch (e) {
-      log.printError(error: "header: $_header", canPrint: canPrint);
-      log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-
-      return left(CleanFailure.withData(
-          statusCode: -1,
-          enableDialogue: _enableDialogue,
-          tag: endPoint,
-          method: 'PUT',
-          url: "$_baseUrl$endPoint",
-          header: _header,
-          body: body ?? {"data": "null"},
-          error: e.toString()));
-    }
+    return fetch<T>(request: request);
   }
 
   Future<Either<CleanFailure, T>> patch<T>(
@@ -284,35 +122,19 @@ class CleanApi {
       Map<String, String>? header}) async {
     final bool canPrint = showLogs ?? _showLogs;
 
-    final Map<String, String> _header = header ?? this.header;
     log.printInfo(info: "body: $body", canPrint: canPrint);
-    try {
-      final http.Response _response = await http.patch(
-        Uri.parse("$_baseUrl$endPoint"),
-        body: jsonEncode(body),
+
+    final Map<String, String> _header = header ?? this.header;
+    final request = RequestData<T>(
+        method: RequestMethod.patch,
+        uri: Uri.parse("$_baseUrl$endPoint"),
+        showLogs: canPrint,
+        fromData: fromData,
         headers: _header,
-      );
+        failureHandler: failureHandler,
+        body: body);
 
-      return _handleResponse<T>(
-          response: _response,
-          endPoint: endPoint,
-          fromData: fromData,
-          failureHandler: failureHandler,
-          canPrint: canPrint);
-    } catch (e) {
-      log.printError(error: "header: $_header", canPrint: canPrint);
-      log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-
-      return left(CleanFailure.withData(
-          statusCode: -1,
-          enableDialogue: _enableDialogue,
-          tag: endPoint,
-          method: 'PUT',
-          url: "$_baseUrl$endPoint",
-          header: _header,
-          body: body,
-          error: e.toString()));
-    }
+    return fetch<T>(request: request);
   }
 
   Future<Either<CleanFailure, T>> delete<T>(
@@ -325,108 +147,87 @@ class CleanApi {
           failureHandler,
       Map<String, String>? header}) async {
     final bool canPrint = showLogs ?? _showLogs;
+
     if (body != null) {
       log.printInfo(info: "body: $body", canPrint: canPrint);
     }
-    final Map<String, String> _header = header ?? this.header;
-    try {
-      final Response _response = await http.delete(
-        Uri.parse("$_baseUrl$endPoint"),
-        body: body != null ? jsonEncode(body) : null,
-        headers: _header,
-      );
 
-      return _handleResponse<T>(
-          response: _response,
-          endPoint: endPoint,
-          fromData: fromData,
-          failureHandler: failureHandler,
-          canPrint: canPrint);
-    } catch (e) {
-      log.printError(error: "header: $_header", canPrint: canPrint);
-      log.printError(error: "error: ${e.toString()}", canPrint: canPrint);
-      return left(CleanFailure.withData(
-          statusCode: -1,
-          enableDialogue: _enableDialogue,
-          tag: endPoint,
-          method: 'DELETE',
-          url: "$_baseUrl$endPoint",
-          header: _header,
-          body: body ?? {},
-          error: e.toString()));
-    }
+    final Map<String, String> _header = header ?? this.header;
+    final request = RequestData<T>(
+        method: RequestMethod.delete,
+        uri: Uri.parse("$_baseUrl$endPoint"),
+        showLogs: canPrint,
+        fromData: fromData,
+        headers: _header,
+        failureHandler: failureHandler,
+        body: body);
+
+    return fetch<T>(request: request);
   }
 
-  Either<CleanFailure, T> _handleResponse<T>(
-      {required Response response,
-      required String endPoint,
-      Map<String, dynamic>? body,
-      required T Function(dynamic data) fromData,
-      required Either<CleanFailure, T> Function(
-              int statusCode, Map<String, dynamic> responseBody)?
-          failureHandler,
-      required bool canPrint,
-      Map<String, String>? header}) {
-    log.printInfo(info: "request: ${response.request}", canPrint: canPrint);
-    log.printResponse(json: response.body, canPrint: canPrint);
+  Either<CleanFailure, T> _handleResponse<T>({
+    required Response response,
+    required RequestData<T> request,
+  }) {
+    log.printInfo(
+        info: "request: ${response.request}", canPrint: request.showLogs);
+    log.printResponse(json: response.body, canPrint: request.showLogs);
 
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       final _regResponse = cleanJsonDecode(response.body);
 
       try {
-        final T _typedResponse = fromData(_regResponse);
+        final T _typedResponse = request.fromData(_regResponse);
         log.printSuccess(
-            msg: "parsed data: $_typedResponse", canPrint: canPrint);
+            msg: "parsed data: $_typedResponse", canPrint: request.showLogs);
         return right(_typedResponse);
       } catch (e) {
-        if (failureHandler != null) {
-          return failureHandler(
+        if (request.failureHandler != null) {
+          return request.failureHandler!(
             response.statusCode,
             cleanJsonDecode(response.body),
           );
         } else {
           log.printWarning(
-              warn: "header: ${response.request?.headers}", canPrint: canPrint);
+              warn: "header: ${response.request?.headers}",
+              canPrint: request.showLogs);
           log.printWarning(
-              warn: "request: ${response.request}", canPrint: canPrint);
+              warn: "request: ${response.request}", canPrint: request.showLogs);
 
-          log.printWarning(warn: "body: ${response.body}", canPrint: canPrint);
           log.printWarning(
-              warn: "status code: ${response.statusCode}", canPrint: canPrint);
+              warn: "body: ${response.body}", canPrint: request.showLogs);
+          log.printWarning(
+              warn: "status code: ${response.statusCode}",
+              canPrint: request.showLogs);
           return left(CleanFailure.withData(
               statusCode: response.statusCode,
+              request: request,
               enableDialogue: _enableDialogue,
-              tag: endPoint,
-              method: response.request!.method,
-              url: "$_baseUrl$endPoint",
-              header: response.request?.headers ?? {},
-              body: body ?? {},
               error: cleanJsonDecode(response.body)));
         }
       }
     } else {
-      if (failureHandler != null) {
-        return failureHandler(
+      if (request.failureHandler != null) {
+        return request.failureHandler!(
           response.statusCode,
           cleanJsonDecode(response.body),
         );
       } else {
         log.printWarning(
-            warn: "header: ${response.request?.headers}", canPrint: canPrint);
+            warn: "header: ${response.request?.headers}",
+            canPrint: request.showLogs);
         log.printWarning(
-            warn: "request: ${response.request}", canPrint: canPrint);
+            warn: "request: ${response.request}", canPrint: request.showLogs);
 
-        log.printWarning(warn: "body: ${response.body}", canPrint: canPrint);
         log.printWarning(
-            warn: "status code: ${response.statusCode}", canPrint: canPrint);
+            warn: "body: ${response.body}", canPrint: request.showLogs);
+        log.printWarning(
+            warn: "status code: ${response.statusCode}",
+            canPrint: request.showLogs);
         return left(CleanFailure.withData(
             statusCode: response.statusCode,
             enableDialogue: _enableDialogue,
-            tag: endPoint,
-            method: response.request!.method,
-            url: "$_baseUrl$endPoint",
-            header: response.request?.headers ?? {},
-            body: body ?? {},
+            request: request,
             error: cleanJsonDecode(response.body)));
       }
     }
@@ -437,6 +238,63 @@ class CleanApi {
       return jsonDecode(body);
     } catch (_) {
       throw body;
+    }
+  }
+
+  Future<http.Response> call({required RequestData request}) async {
+    switch (request.method) {
+      case RequestMethod.get:
+        return http.get(
+          request.uri,
+          headers: request.headers,
+        );
+      case RequestMethod.post:
+        return http.post(
+          request.uri,
+          body: request.jsonEncodedBody,
+          headers: request.headers,
+        );
+      case RequestMethod.put:
+        return http.put(
+          request.uri,
+          body: request.jsonEncodedBody,
+          headers: request.headers,
+        );
+      case RequestMethod.patch:
+        return http.patch(
+          request.uri,
+          body: request.jsonEncodedBody,
+          headers: request.headers,
+        );
+      case RequestMethod.delete:
+        return http.delete(
+          request.uri,
+          body: request.jsonEncodedBody,
+          headers: request.headers,
+        );
+    }
+  }
+
+  Future<Either<CleanFailure, T>> fetch<T>(
+      {required RequestData<T> request}) async {
+    log.printInfo(info: "body: ${request.body}", canPrint: request.showLogs);
+    try {
+      final http.Response _response = await call(request: request);
+
+      return _handleResponse<T>(
+        response: _response,
+        request: request,
+      );
+    } catch (e) {
+      log.printError(error: "header: $_header", canPrint: request.showLogs);
+      log.printError(
+          error: "error: ${e.toString()}", canPrint: request.showLogs);
+
+      return left(CleanFailure.withData(
+          statusCode: -1,
+          enableDialogue: _enableDialogue,
+          request: request,
+          error: e.toString()));
     }
   }
 }

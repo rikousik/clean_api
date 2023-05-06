@@ -1,5 +1,6 @@
 library clean_api;
 
+import 'package:clean_api/models/request_options.dart';
 import 'package:clean_api/src/clean_log.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart';

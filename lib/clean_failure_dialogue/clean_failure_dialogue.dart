@@ -17,19 +17,13 @@ class CleanFailureDialogue extends StatelessWidget {
           color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
       title: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
+        children: const [
+          Icon(
             Icons.error_outline_sharp,
             color: Colors.red,
           ),
-          const SizedBox(
+          SizedBox(
             width: 5,
-          ),
-          Flexible(
-            child: Text(
-              failure.tag,
-              maxLines: 2,
-            ),
           ),
         ],
       ),

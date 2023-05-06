@@ -86,13 +86,6 @@ class CleanFailureDetailsPage extends StatelessWidget {
             child: ListView(
                 padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
                 children: [
-                  Text(
-                    failure.tag,
-                    style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
                   const SizedBox(
                     height: 10,
                   ),
