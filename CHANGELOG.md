@@ -1,3 +1,7 @@
+## 0.9.2
+
+- accpet text body
+
 ## 0.9.0
 
 - seperation completed 

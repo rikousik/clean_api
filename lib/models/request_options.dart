@@ -10,7 +10,7 @@ enum RequestMethod { get, post, put, patch, delete }
 class RequestData<T> extends Equatable {
   final RequestMethod method;
   final Uri uri;
-  final Map<String, dynamic>? body;
+  final dynamic body;
   final bool showLogs;
   final T Function(dynamic data) fromData;
   final Map<String, String>? headers;
@@ -26,7 +26,11 @@ class RequestData<T> extends Equatable {
     this.failureHandler,
   });
 
-  String? get jsonEncodedBody => body != null ? jsonEncode(body) : null;
+  String? get jsonEncodedBody => body != null
+      ? body is String
+          ? body
+          : jsonEncode(body)
+      : null;
   @override
   List<Object?> get props {
     return [
