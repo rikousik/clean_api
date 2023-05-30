@@ -1,3 +1,11 @@
+## 1.1.0
+
+- Updated SDK
+
+## 1.0.0
+
+- Just updated dependencies
+
 ## 0.9.2
 
 - accpet text body

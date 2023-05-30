@@ -15,9 +15,9 @@ class CleanFailureDialogue extends StatelessWidget {
       contentTextStyle: const TextStyle(color: Colors.black),
       titleTextStyle: const TextStyle(
           color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
-      title: Row(
+      title: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Icon(
             Icons.error_outline_sharp,
             color: Colors.red,

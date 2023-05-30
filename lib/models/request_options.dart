@@ -28,7 +28,7 @@ class RequestData<T> extends Equatable {
 
   String? get jsonEncodedBody => body != null
       ? body is String
-          ? body
+          ? body as String
           : jsonEncode(body)
       : null;
   @override
