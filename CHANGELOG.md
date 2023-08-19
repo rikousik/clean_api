@@ -1,5 +1,9 @@
 ## 1.1.0
 
+- Updated dependencies
+
+## 1.1.0
+
 - Updated SDK
 
 ## 1.0.0
